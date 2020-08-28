@@ -196,7 +196,7 @@ void URenderGraphics(void) {
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
 	// draws the triangle
-	glDrawArrays(GL_TRIANGLES, 0, 100);
+	glDrawArrays(GL_TRIANGLES, 0, 9);
 
 	glBindVertexArray(0); // deactivate the vertex array object
 
@@ -250,8 +250,8 @@ void UCreateBuffers() {
 		 0.25f,  0.0f,  0.0f,	0.0f,  1.0f, 1.0f,	// v5 cyan
 
 		// Front: Bottom Right
-		 0.25f,  0.0f,  0.0f,	1.0f,  0.5f, 0.0f,	// v6 magenta
-		  0.0f,  0.5f,  0.0f,	0.5f,  0.0f, 1.0f,	// v7 dark blue
+		 0.25f,  0.0f,  0.0f,	0.5f,  0.0f, 0.5f,	// v6 magenta
+		  0.0f,  0.5f,  0.0f,	0.0f,  0.5f, 1.0f,	// v7 dark blue
 		-0.25f,  0.0f,  0.0f,	1.0f , 1.0f, 0.0f	// v8 yellow
 
 	};

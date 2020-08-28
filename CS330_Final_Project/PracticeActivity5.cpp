@@ -165,6 +165,9 @@ void URenderGraphics(void) {
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clears the screen
 
+	// enable cull facing
+	glEnable(GL_CULL_FACE);
+
     CameraForwardZ = front; // replaces camera forward vector with Radians normalized as a unit vector
 
     // initialize variables for matrix uniforms

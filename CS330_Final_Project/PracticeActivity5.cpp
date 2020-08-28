@@ -202,7 +202,7 @@ void URenderGraphics(void) {
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
 	// draws the triangle
-	glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, 4, GL_UNSIGNED_INT, 0);
 
 	glBindVertexArray(0); // deactivate the vertex array object
 

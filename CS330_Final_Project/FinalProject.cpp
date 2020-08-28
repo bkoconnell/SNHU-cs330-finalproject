@@ -290,8 +290,15 @@ void URenderGraphics(void){
     // Transform the camera
     view = glm::lookAt(cameraPosition - CameraForwardZ, cameraPosition, CameraUpY);
 
-    // Set the camera projection to perspective
-    projection = glm::perspective(fov,(GLfloat)WindowWidth / (GLfloat)WindowHeight, 0.1f, 100.0f);
+
+    /* INITIAL TOGGLE PROJECTION BRANCH */
+    // initiates projection toggle between Perspective view and Ortho view..
+   	if(toggleProjection == 1){
+    	projection = glm::perspective(45.0f, (GLfloat)WindowWidth / (GLfloat)WindowHeight, 0.1f, 100.0f);
+   	}
+   	else{
+    	projection = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, 0.1f, 100.0f);
+   	}
 
     // Reference matrix uniforms from the pyramid Shader program
     modelLoc = glGetUniformLocation(pyramidShaderProgram, "model");

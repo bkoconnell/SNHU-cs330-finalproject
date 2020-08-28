@@ -199,7 +199,7 @@ void URenderGraphics(void) {
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
 	// draws the triangle
-	glDrawElements(GL_TRIANGLES, 18, GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, 20, GL_UNSIGNED_INT, 0);
 
 	glBindVertexArray(0); // deactivate the vertex array object
 
@@ -398,28 +398,28 @@ void UCreateBuffers() {
 	GLuint indices[] = {
 
 			// triangles
-			  0, 148,  92, // triangle 1
-			  1,  92,  66, // triangle 2
-			  0,  66,  29, // triangle 3
-			  0,  29,  67, // triangle 4
-			  0,  67,  93, // triangle 5
-			  0,  93, 149, // triangle 6
-			  4,  15,  92, // triangle 7
-			  4,  93,  16, // triangle 8
+			  0,  92, 148, // triangle 1
+			  0,  66,  92, // triangle 2
+			  0,  29,  66, // triangle 3
+			  0,  67,  29, // triangle 4
+			  0,  93,  67, // triangle 5
+			  0, 149,  93, // triangle 6
+			 92,  15, 148, // triangle 7
+			 93, 149,  16, // triangle 8
 
 
-			 14,  15,  91, // t
-			 15,  91,  92, // t
-			 91,  92,  65, // t
-			 92,  65,  66, // t
-			 29,  65,  66, // t
+			 15,  91,  14, // t
+			 15,  92,  91, // t
+			 92,  65,  91, // t
+			 92,  66,  65, // t
+			 66,  29,  65, // t
 			 29,  30,  65, // t
 
-			 29,  30,  67, // t
-			 30,  67,  68, // t
-			 67,  68,  94, // t
+			 29,  67,  30, // t
+			 67,  68,  30, // t
+			 67,  94,  68, // t
 			 67,  93,  94, // t
-			 16,  93,  94, // t
+			 93,  16,  94, // t
 			 16,  17,  94  // t
 
 

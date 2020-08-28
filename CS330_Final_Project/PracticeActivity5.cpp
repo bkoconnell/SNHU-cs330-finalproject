@@ -166,7 +166,7 @@ void URenderGraphics(void) {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clears the screen
 
 	// enable cull facing
-	glEnable(GL_CULL_FACE);
+//	glEnable(GL_CULL_FACE);
 
     CameraForwardZ = front; // replaces camera forward vector with Radians normalized as a unit vector
 
@@ -188,6 +188,7 @@ void URenderGraphics(void) {
     // transform the camera
     view = glm::lookAt(cameraPosition - CameraForwardZ, cameraPosition, CameraUpY);
 
+    //FIXME:  Need IF branch statement for Toggling Perspective
 	// creates a perspective projection
 	projection = glm::perspective(45.0f, (GLfloat)WindowWidth / (GLfloat)WindowHeight, 0.1f, 100.0f);
 
@@ -202,7 +203,7 @@ void URenderGraphics(void) {
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
 	// draws the triangle
-	glDrawElements(GL_TRIANGLES, 4, GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
 
 	glBindVertexArray(0); // deactivate the vertex array object
 
@@ -246,32 +247,23 @@ void UCreateBuffers() {
 		//	Vertex              // Color
 
 		// Front Vertices
-		 -0.5f, -0.5f,  0.0f,	1.0f, 0.75f, 0.0f,	// v0
-		  0.0f, -0.5f,  0.0f,	1.0f, 0.63f, 0.0f,	// v1
-		-0.25f,  0.0f,  0.0f,	1.0f,  1.0f, 0.0f,	// v2
-		-0.25f,  0.0f,  0.0f,	0.0f , 0.0f, 0.0f,	// v3 dup
-		 0.25f,  0.0f,  0.0f,	1.0f, 0.63f, 0.0f,	// v4
-		  0.0f,  0.5f,  0.0f,	1.0f,  1.0f, 0.0f,	// v5
-		  0.0f, -0.5f,  0.0f,	0.0f,  0.0f, 0.0f,	// v6 dup
-		  0.5f, -0.5f,  0.0f,	1.0f, 0.63f, 0.0f,	// v7
-		 0.25f,  0.0f,  0.0f,	0.0f,  0.0f, 0.0f	// v8 dup
+		 -0.5f, -0.5f,  0.0f,	1.0f,  0.0f, 0.0f,	// v0 red
+		-0.25f,  0.0f,  0.0f,	0.0f , 1.0f, 0.0f,	// v1 green
+		  0.0f,  0.5f,  0.0f,	0.0f,  1.0f, 1.0f,	// v2 cyan
+		  0.0f, -0.5f,  0.0f,	0.0f,  0.0f, 1.0f,	// v3 blue
+		  0.5f, -0.5f,  0.0f,	1.0f, 0.63f, 0.0f,	// v4 gold
+		 0.25f,  0.0f,  0.0f,	0.5f,  0.0f, 0.0f	// v5 dark red
 
 	};
 
 	// index data to share position data
 	GLuint indices[] = {
 
-			// triangles
-			  0, 1, 2, // triangle 1 (bottom left)
-			  1, 7, 4, // triangle 2 (bottom right)
-			  3, 6, 8, // triangle 3 (center)
-			  2, 4, 5  // triangle 3 (top)
+			// FRONT triangles
+			  0, 3, 1, // triangle 1 (bottom left)
+			  3, 4, 5, // triangle 2 (bottom right)
+			  2, 1, 5, // triangle 3 (top)
 
-			// triangles
-//			  2, 1, 4, // triangle 1 (bottom left)
-//			  1, 3, 4, // triangle 2 (bottom right)
-//			  0, 3, 1, // triangle 3 (center)
-//			  3, 5, 4  // triangle 3 (top)
 	};
 
 	// generate buffer ids

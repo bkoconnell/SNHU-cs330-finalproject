@@ -154,6 +154,9 @@ void UResizeWindow(int w, int h) {
 void URenderGraphics(void) {
 
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clears the screen
+	glEnable(GL_DEPTH_TEST); // enable Z depth
+	glDepthFunc(GL_LESS); // accept fragment if closer to the camera than the former one
+
 
 	// enable cull facing
 //	glEnable(GL_CULL_FACE);

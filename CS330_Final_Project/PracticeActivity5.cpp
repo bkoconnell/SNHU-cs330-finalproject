@@ -1,17 +1,8 @@
 /*
- * PracticeActivity5.cpp
+ * 3D TRIFORCE
  *
- *  Created on: Aug 27, 2020
- *      Author: 1455100_snhu
- */
-
-
-/*
- * 4-1_Practice_Activity_5.cpp
+ * glDrawArrays
  *
- *  Created on: Aug 5, 2020
- *      Author: 1455100_snhu
- *      Brendan O'Connell
  */
 
 /* Header Inclusions */
@@ -27,7 +18,7 @@
 
 using namespace std; // standard namespace
 
-#define WINDOW_TITLE "4-1 Practice Activity 5" // Window title macro
+#define WINDOW_TITLE "3D Triforce -- glDrawArrays" // Window title macro
 
 /* SHADER program macro */
 #ifndef GLSL
@@ -36,7 +27,7 @@ using namespace std; // standard namespace
 
 /* variable declarations for shader, window size init, buffer and array objects */
 GLint shaderProgram, WindowWidth = 800, WindowHeight = 600;
-GLuint VBO, VAO, EBO, texture;
+GLuint VBO, VAO, texture;
 
 // global variable declarations for mouse, keyboard, camera/graphics, etc.
 GLfloat degrees = glm::radians(-45.0f); // converts float to degrees
@@ -145,7 +136,6 @@ int main(int argc, char* argv[]) {
 	// destroys buffer objects once used
 	glDeleteVertexArrays(1, &VAO);
 	glDeleteBuffers(1, &VBO);
-	glDeleteBuffers(1, &EBO);
 
 	return 0; // exits main function
 }
@@ -203,7 +193,7 @@ void URenderGraphics(void) {
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
 	// draws the triangle
-	glDrawElements(GL_TRIANGLES, 9, GL_UNSIGNED_INT, 0);
+	glDrawArrays(GL_TRIANGLES, 0, 18);
 
 	glBindVertexArray(0); // deactivate the vertex array object
 
@@ -256,20 +246,10 @@ void UCreateBuffers() {
 
 	};
 
-	// index data to share position data
-	GLuint indices[] = {
-
-			// FRONT triangles
-			  0, 3, 1, // triangle 1 (bottom left)
-			  3, 4, 5, // triangle 2 (bottom right)
-			  2, 1, 5, // triangle 3 (top)
-
-	};
 
 	// generate buffer ids
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
-	glGenBuffers(1, &EBO);
 
 	//activate the vertex array object before binding and setting any VBOs & vertex attribute pointers
 	glBindVertexArray(VAO);
@@ -278,9 +258,6 @@ void UCreateBuffers() {
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); // Copy vertices to VBO
 
-	// Activate the Element Buffer Object / Indices
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW); // copy indices to EBO
 
 	// set attribute pointer 0 to hold position data
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)0);

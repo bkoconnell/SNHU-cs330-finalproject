@@ -1,4 +1,7 @@
-/* ADDED CAMERA FUNCTIONALITY BUT LOST LIGHTING */
+/* ADDED CAMERA FUNCTIONALITY BUT LIGHTING IS STRANGE */
+
+//FIXME: Investigate the Lighting Reflection issue
+
 
 
 /*
@@ -32,7 +35,7 @@
 
 using namespace std; // standard namespace
 
-#define WINDOW_TITLE "Duck Pic" // macro for window title
+#define WINDOW_TITLE "Final Project" // macro for window title
 
 // shader program macro
 #ifndef GLSL

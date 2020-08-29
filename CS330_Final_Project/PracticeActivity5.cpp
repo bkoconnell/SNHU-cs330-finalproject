@@ -1,7 +1,7 @@
 /*
  * 3D TRIFORCE
  *
- * glDrawArrays
+ * glDrawArrays for Triforce
  *
  */
 

@@ -673,7 +673,7 @@ void UGenerateTexture(){
     int width, height; // initialize dimensions
 
     /* JPEG image should be in project source folder */
-    unsigned char* image = SOIL_load_image("snhu.jpg", &width, &height, 0, SOIL_LOAD_RGB); // Loads texture file
+    unsigned char* image = SOIL_load_image("texture_71_gold_1940pixels.jpg", &width, &height, 0, SOIL_LOAD_RGB); // Loads texture file
 
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);

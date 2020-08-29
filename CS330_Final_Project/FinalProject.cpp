@@ -35,7 +35,7 @@
 
 using namespace std; // standard namespace
 
-#define WINDOW_TITLE "Final Project" // macro for window title
+#define WINDOW_TITLE "3D Triforce" // macro for window title
 
 // shader program macro
 #ifndef GLSL
@@ -64,6 +64,7 @@ GLint mod = 0; // initialize mod variable for glutGetModifiers()
 
 // Projection Toggle global variable
 int toggleProjection = 1; // Perspective view = 1;  Ortho view = 0
+
 /*	Partial credit for code idea on projection toggle goes to Nexusone from Khronos forum:
 *	https://community.khronos.org/t/switching-between-ortho-and-perspective-views/31561
 */
@@ -269,7 +270,12 @@ void UResizeWindow(int w, int h){
 void URenderGraphics(void){
 
     glEnable(GL_DEPTH_TEST); // enable Z depth
+	glDepthFunc(GL_LESS); // accept fragment if closer to the camera than the former one
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clears the screen
+
+    // enable cull facing
+//	glEnable(GL_CULL_FACE);
 
     CameraForwardZ = front; // replaces camera forward vector with Radians normalized as a unit vector
 
@@ -294,7 +300,7 @@ void URenderGraphics(void){
     view = glm::lookAt(cameraPosition - CameraForwardZ, cameraPosition, CameraUpY);
 
 
-    /* INITIAL TOGGLE PROJECTION BRANCH */
+   /* TOGGLE PROJECTION */
     // initiates projection toggle between Perspective view and Ortho view..
    	if(toggleProjection == 1){
     	projection = glm::perspective(45.0f, (GLfloat)WindowWidth / (GLfloat)WindowHeight, 0.1f, 100.0f);
@@ -371,10 +377,29 @@ void UCreateShader()
     glShaderSource(pyramidVertexShader, 1, &pyramidVertexShaderSource, NULL); // Attaches the Vertex shader to the source code
     glCompileShader(pyramidVertexShader); // Compiles the Vertex shader
 
+	// check for shader compile errors
+	int success;
+	char infoLog[512];
+	glGetShaderiv(pyramidVertexShader, GL_COMPILE_STATUS, &success);
+	if (!success){
+	    glGetShaderInfoLog(pyramidVertexShader, 512, NULL, infoLog);
+	    std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+	}
+
+
     // Pyramid Fragment Shader
     GLint pyramidFragmentShader = glCreateShader(GL_FRAGMENT_SHADER); // Creates the Fragment Shader
     glShaderSource(pyramidFragmentShader, 1, &pyramidFragmentShaderSource, NULL); // Attaches the Fragment shader to the source code
     glCompileShader(pyramidFragmentShader); // Compiles the Fragment Shader
+
+    // check for shader compile errors
+    glGetShaderiv(pyramidFragmentShader, GL_COMPILE_STATUS, &success);
+    if (!success)
+    {
+        glGetShaderInfoLog(pyramidFragmentShader, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
+    }
+
 
     // Pyramid Shader program
     pyramidShaderProgram = glCreateProgram(); // Creates the Shader program and returns an id
@@ -382,9 +407,19 @@ void UCreateShader()
     glAttachShader(pyramidShaderProgram, pyramidFragmentShader); // Attaches Fragment shader to the Shader program
     glLinkProgram(pyramidShaderProgram); // Link Vertex and Fragment shaders to the Shader program
 
+    // check for linking errors
+    glGetProgramiv(pyramidShaderProgram, GL_LINK_STATUS, &success);
+    if (!success) {
+        glGetProgramInfoLog(pyramidShaderProgram, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+    }
+
+
     // Delete the Vertex and Fragment shaders once linked
     glDeleteShader(pyramidVertexShader);
     glDeleteShader(pyramidFragmentShader);
+
+
 
 
     // Lamp Vertex shader
@@ -447,6 +482,130 @@ void UCreateBuffers()
 		 0.5f, -0.5f,  0.5f,     0.0f, -1.0f,  0.0f,    1.0f, 0.0f,
 
     };
+    
+//		//	Vertex data           // Color data
+//
+///* FRONT TRIFORCE */
+//		// FRONT: Bottom Left triangle
+//		 -0.5f, -0.5f,  0.0f,     1.0f, 0.73f, 0.0f,  // v0
+//		  0.0f, -0.5f,  0.0f,	  1.0f, 0.73f, 0.0f,  // v1
+//		-0.25f,  0.0f,  0.0f,	  1.0f, 0.73f, 0.0f,  // v2
+//
+//		// FRONT: Bottom Right triangle
+//		  0.0f, -0.5f,  0.0f,	  1.0f, 0.73f, 0.0f,  // v3
+//		  0.5f, -0.5f,  0.0f,	  1.0f, 0.73f, 0.0f,  // v4
+//		 0.25f,  0.0f,  0.0f,	  1.0f, 0.73f, 0.0f,  // v5
+//
+//		// FRONT: Top triangle
+//		 0.25f,  0.0f,  0.0f,	  1.0f, 0.73f, 0.0f,  // v6
+//		  0.0f,  0.5f,  0.0f,	  1.0f, 0.73f, 0.0f,  // v7
+//		-0.25f,  0.0f,  0.0f,	  1.0f, 0.73f, 0.0f,  // v8
+//
+///* BACK TRIFORCE */
+//		// BACK: Bottom Left Triangle
+//		 -0.5f, -0.5f, -0.125f,   1.0f, 0.73f, 0.0f,  // v9
+//		  0.0f, -0.5f, -0.125f,   1.0f, 0.73f, 0.0f,  // v10
+//	    -0.25f,  0.0f, -0.125f,   1.0f, 0.73f, 0.0f,  // v11
+//
+//		// BACK: Bottom Right Triangle
+//		  0.0f, -0.5f, -0.125f,   1.0f, 0.73f, 0.0f,  // v12
+//		  0.5f, -0.5f, -0.125f,   1.0f, 0.73f, 0.0f,  // v13
+//	     0.25f,  0.0f, -0.125f,   1.0f, 0.73f, 0.0f,  // v14
+//
+//
+//		// BACK: Top Triangle
+//		 0.25f,  0.0f, -0.125f,   1.0f, 0.73f, 0.0f,  // v15
+//		  0.0f,  0.5f, -0.125f,   1.0f, 0.73f, 0.0f,  // v16
+//	    -0.25f,  0.0f, -0.125f,   1.0f, 0.73f, 0.0f,  // v17
+//
+//
+///* TRIFORCE SIDES: ... LEFT ... BOTTOM ... RIGHT ...  */
+//
+//	/* BOTTOM LEFT TRIANGLE */
+//		// LEFT SIDE
+//		 -0.5f, -0.5f, -0.125f,   1.0f, 0.73f, 0.0f,  // v18
+//		 -0.5f, -0.5f,    0.0f,   1.0f, 0.73f, 0.0f,  // v19
+//	    -0.25f,  0.0f, -0.125f,   1.0f, 0.73f, 0.0f,  // v20
+//
+//		 -0.5f, -0.5f,    0.0f,   1.0f, 0.73f, 0.0f,  // v21
+//		-0.25f,  0.0f,    0.0f,   1.0f, 0.73f, 0.0f,  // v22
+//	    -0.25f,  0.0f, -0.125f,   1.0f, 0.73f, 0.0f,  // v23
+//
+//		// BOTTOM SIDE
+//		 -0.5f, -0.5f, -0.125f,   1.0f, 0.73f, 0.0f,  // v24
+//		 -0.5f, -0.5f,    0.0f,   1.0f, 0.73f, 0.0f,  // v25
+//	      0.0f, -0.5f, -0.125f,   1.0f, 0.73f, 0.0f,  // v26
+//
+//		 -0.5f, -0.5f,    0.0f,   1.0f, 0.73f, 0.0f,  // v27
+//		  0.0f, -0.5f,    0.0f,   1.0f, 0.73f, 0.0f,  // v28
+//	      0.0f, -0.5f, -0.125f,   1.0f, 0.73f, 0.0f,  // v29
+//
+//		// RIGHT SIDE
+//		  0.0f, -0.5f,    0.0f,   1.0f, 0.73f, 0.0f,  // v30
+//		  0.0f, -0.5f, -0.125f,   1.0f, 0.73f, 0.0f,  // v31
+//	    -0.25f,  0.0f,    0.0f,   1.0f, 0.73f, 0.0f,  // v32
+//
+//		  0.0f, -0.5f, -0.125f,   1.0f, 0.73f, 0.0f,  // v33
+//	    -0.25f,  0.0f, -0.125f,   1.0f, 0.73f, 0.0f,  // v34
+//	    -0.25f,  0.0f,    0.0f,   1.0f, 0.73f, 0.0f,  // v35
+//
+//	/* BOTTOM RIGHT TRIANGLE */
+//		// LEFT SIDE
+//		  0.0f, -0.5f, -0.125f,   1.0f, 0.73f, 0.0f,  // v36
+//		  0.0f, -0.5f,    0.0f,   1.0f, 0.73f, 0.0f,  // v37
+//	     0.25f,  0.0f, -0.125f,   1.0f, 0.73f, 0.0f,  // v38
+//
+//		  0.0f, -0.5f,    0.0f,   1.0f, 0.73f, 0.0f,  // v39
+//		 0.25f,  0.0f,    0.0f,   1.0f, 0.73f, 0.0f,  // v40
+//	     0.25f,  0.0f, -0.125f,   1.0f, 0.73f, 0.0f,  // v41
+//
+//		// BOTTOM SIDE
+//		  0.0f, -0.5f, -0.125f,   1.0f, 0.73f, 0.0f,  // v42
+//		  0.0f, -0.5f,    0.0f,   1.0f, 0.73f, 0.0f,  // v43
+//	      0.5f, -0.5f, -0.125f,   1.0f, 0.73f, 0.0f,  // v44
+//
+//		  0.0f, -0.5f,    0.0f,   1.0f, 0.73f, 0.0f,  // v45
+//		  0.5f, -0.5f,    0.0f,   1.0f, 0.73f, 0.0f,  // v46
+//	      0.5f, -0.5f, -0.125f,   1.0f, 0.73f, 0.0f,  // v47
+//
+//		// RIGHT SIDE
+//		  0.5f, -0.5f,    0.0f,   1.0f, 0.73f, 0.0f,  // v48
+//		  0.5f, -0.5f, -0.125f,   1.0f, 0.73f, 0.0f,  // v49
+//	     0.25f,  0.0f,    0.0f,   1.0f, 0.73f, 0.0f,  // v50
+//
+//		  0.5f, -0.5f, -0.125f,   1.0f, 0.73f, 0.0f,  // v51
+//		 0.25f,  0.0f, -0.125f,   1.0f, 0.73f, 0.0f,  // v52
+//	     0.25f,  0.0f,    0.0f,   1.0f, 0.73f, 0.0f,  // v53
+//
+//	/* TOP TRIANGLE */
+//		// LEFT SIDE
+//		-0.25f,  0.0f, -0.125f,   1.0f, 0.73f, 0.0f,  // v54
+//		-0.25f,  0.0f,    0.0f,   1.0f, 0.73f, 0.0f,  // v55
+//	      0.0f,  0.5f, -0.125f,   1.0f, 0.73f, 0.0f,  // v56
+//
+//		-0.25f,  0.0f,    0.0f,   1.0f, 0.73f, 0.0f,  // v57
+//		  0.0f,  0.5f,    0.0f,   1.0f, 0.73f, 0.0f,  // v58
+//	      0.0f,  0.5f, -0.125f,   1.0f, 0.73f, 0.0f,  // v59
+//
+//		// BOTTOM SIDE
+//		-0.25f,  0.0f, -0.125f,   1.0f, 0.73f, 0.0f,  // v60
+//		-0.25f,  0.0f,    0.0f,   1.0f, 0.73f, 0.0f,  // v61
+//	     0.25f,  0.0f, -0.125f,   1.0f, 0.73f, 0.0f,  // v62
+//
+//		-0.25f,  0.0f,    0.0f,   1.0f, 0.73f, 0.0f,  // v63
+//		 0.25f,  0.0f,    0.0f,   1.0f, 0.73f, 0.0f,  // v64
+//	     0.25f,  0.0f, -0.125f,   1.0f, 0.73f, 0.0f,  // v65
+//
+//		// RIGHT SIDE
+//		 0.25f,  0.0f,    0.0f,   1.0f, 0.73f, 0.0f,  // v66
+//		 0.25f,  0.0f, -0.125f,   1.0f, 0.73f, 0.0f,  // v67
+//	      0.0f,  0.5f,    0.0f,   1.0f, 0.73f, 0.0f,  // v68
+//
+//		 0.25f,  0.0f, -0.125f,   1.0f, 0.73f, 0.0f,  // v69
+//		  0.0f,  0.5f, -0.125f,   1.0f, 0.73f, 0.0f,  // v70
+//		  0.0f,  0.5f,    0.0f,   1.0f, 0.73f, 0.0f   // v71
+//
+//	};
 
 
     // Generate buffer ids

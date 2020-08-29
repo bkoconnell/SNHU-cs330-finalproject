@@ -194,6 +194,9 @@ void URenderGraphics(void) {
 	glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
+//	// polygon mode: confirm arrays drawn (optional check for new vertices... COMMENT OUT once confirmed)
+//	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
 	// draws the triangle
 	glDrawArrays(GL_TRIANGLES, 0, 72);
 

@@ -333,6 +333,10 @@ void URenderGraphics(void){
 
     glActiveTexture(GL_TEXTURE0); // texture unit 0 is active
     glBindTexture(GL_TEXTURE_2D, texture); // bind texture to texture unit 0
+
+//	// polygon mode: confirm arrays drawn (optional check for new vertices... COMMENT OUT once confirmed)
+//	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
     glDrawArrays(GL_TRIANGLES, 0, 18);	// Draw the primitives / pyramid
 
     glBindVertexArray(0); // Deactivate the Pyramid Vertex Array Object

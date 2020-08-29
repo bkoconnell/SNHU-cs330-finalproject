@@ -195,7 +195,7 @@ void URenderGraphics(void) {
 	glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
 	// draws the triangle
-	glDrawArrays(GL_TRIANGLES, 0, 9);
+	glDrawArrays(GL_TRIANGLES, 0, 24);
 
 	glBindVertexArray(0); // deactivate the vertex array object
 
@@ -262,20 +262,59 @@ void UCreateBuffers() {
 		/* TRIFORCE */
 		//	Vertex              // Color
 
-		// Front: Bottom Left triangle
-		 -0.5f, -0.5f,  0.0f,	1.0f,  0.0f, 0.0f,	// v0 red
-		  0.0f, -0.5f,  0.0f,	0.0f,  0.0f, 1.0f,	// v1 blue
-		-0.25f,  0.0f,  0.0f,	0.0f , 1.0f, 0.0f,	// v2 green
+		// FRONT: Bottom Left triangle (gold)
+		 -0.5f, -0.5f,  0.0f,   1.0f, 0.73f, 0.0f,	// v0
+		  0.0f, -0.5f,  0.0f,	1.0f, 0.73f, 0.0f,	// v1
+		-0.25f,  0.0f,  0.0f,	1.0f, 0.73f, 0.0f,	// v2
 
-//		// Front: Bottom Right triangle
+//		// FRONT: Bottom Right triangle (gold)
 //		  0.0f, -0.5f,  0.0f,	1.0f,  0.0f, 0.0f,	// v3 red
 //		  0.5f, -0.5f,  0.0f,	1.0f, 0.63f, 0.0f,	// v4 gold
 //		 0.25f,  0.0f,  0.0f,	0.0f,  1.0f, 1.0f,	// v5 cyan
 //
-//		// Front: Bottom Right triangle
+//		// FRONT: Top triangle (gold)
 //		 0.25f,  0.0f,  0.0f,	0.5f,  0.0f, 0.5f,	// v6 magenta
 //		  0.0f,  0.5f,  0.0f,	0.0f,  0.5f, 1.0f,	// v7 dark blue
 //		-0.25f,  0.0f,  0.0f,	1.0f , 1.0f, 0.0f	// v8 yellow
+
+
+		// BACK: Bottom Left Triangle (gold)
+		 -0.5f, -0.5f, -0.1f,   1.0f, 0.73f, 0.0f,  // v9
+		  0.0f, -0.5f, -0.1f,   1.0f, 0.73f, 0.0f,  // v10
+	    -0.25f,  0.0f, -0.1f,   1.0f, 0.73f, 0.0f,  // v11
+
+		// BACK: Bottom Right Triangle
+
+
+		// BACK: Top Triangle
+
+
+		// LEFT SIDE of Bottom Left Triangle
+		 -0.5f, -0.5f, -0.1f,   1.0f, 0.73f, 0.0f,  // v18 gold
+		 -0.5f, -0.5f,  0.0f,   1.0f, 0.73f, 0.0f,  // v19
+	    -0.25f,  0.0f, -0.1f,   1.0f, 0.73f, 0.0f,  // v20
+
+		 -0.5f, -0.5f,  0.0f,   1.0f, 0.73f, 0.0f,  // v21 gold
+		-0.25f,  0.0f,  0.0f,   1.0f, 0.73f, 0.0f,  // v22
+	    -0.25f,  0.0f, -0.1f,   1.0f, 0.73f, 0.0f,  // v23
+
+		// BOTTOM SIDE of Bottom Left Triangle
+		 -0.5f, -0.5f, -0.1f,   1.0f, 0.73f, 0.0f,  // v24 gold
+		 -0.5f, -0.5f,  0.0f,   1.0f, 0.73f, 0.0f,  // v25
+	      0.0f, -0.5f, -0.1f,   1.0f, 0.73f, 0.0f,  // v26
+
+		 -0.5f, -0.5f,  0.0f,   1.0f, 0.73f, 0.0f,  // v27 gold
+		  0.0f, -0.5f,  0.0f,   1.0f, 0.73f, 0.0f,  // v28
+	      0.0f, -0.5f, -0.1f,   1.0f, 0.73f, 0.0f,  // v29
+
+		// RIGHT SIDE of Bottom Left Triangle
+		  0.0f, -0.5f,  0.0f,   1.0f, 0.73f, 0.0f,  // v30 gold
+		  0.0f, -0.5f, -0.1f,   1.0f, 0.73f, 0.0f,  // v31
+	    -0.25f,  0.0f,  0.0f,   1.0f, 0.73f, 0.0f,  // v32
+
+		  0.0f, -0.5f, -0.1f,   1.0f, 0.73f, 0.0f,  // v33 gold
+	    -0.25f,  0.0f, -0.1f,   1.0f, 0.73f, 0.0f,  // v34
+	    -0.25f,  0.0f,  0.0f,   1.0f, 0.73f, 0.0f,  // v35
 
 	};
 

@@ -157,6 +157,7 @@ void URenderGraphics(void) {
 	glEnable(GL_DEPTH_TEST); // enable Z depth
 	glDepthFunc(GL_LESS); // accept fragment if closer to the camera than the former one
 
+	glBindVertexArray(VAO); // activate the vertex array object before rendering and transforming them
 
 	// enable cull facing
 //	glEnable(GL_CULL_FACE);
@@ -170,8 +171,6 @@ void URenderGraphics(void) {
     glm::mat4 model;
     glm::mat4 view;
     glm::mat4 projection;
-
-	glBindVertexArray(VAO); // activate the vertex array object before rendering and transforming them
 
 	// transforms the object
 	model = glm::translate(model, glm::vec3(0.0f, 0.0f, 0.0f)); // place the object at the center of the viewport
@@ -212,16 +211,40 @@ void UCreateShader() {
 	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL); // attaches the vertex shader to the source code
 	glCompileShader(vertexShader); // compiles the vertex shader
 
+	// check for shader compile errors
+	int success;
+	char infoLog[512];
+	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+	if (!success){
+	    glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+	    std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
+	}
+
 	// fragment shader
 	GLint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER); // creates the fragment shader
 	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL); // attaches the fragment shader to the source code
 	glCompileShader(fragmentShader); // compiles the fragment shader
+
+    // check for shader compile errors
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+    if (!success)
+    {
+        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
+    }
 
 	// shader program
 	shaderProgram = glCreateProgram(); // creates the shader program and returns an id
 	glAttachShader(shaderProgram, vertexShader); // attach vertex shader to the shader program
 	glAttachShader(shaderProgram, fragmentShader); // attach fragment shader to the shader program
 	glLinkProgram(shaderProgram); // link vertex and fragment shaders to shader program
+
+    // check for linking errors
+    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+    if (!success) {
+        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+        std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
+    }
 
 	// delete the vertex and fragment shaders once linked
 	glDeleteShader(vertexShader);
@@ -239,20 +262,20 @@ void UCreateBuffers() {
 		/* TRIFORCE */
 		//	Vertex              // Color
 
-		// Front: Bottom Left
+		// Front: Bottom Left triangle
 		 -0.5f, -0.5f,  0.0f,	1.0f,  0.0f, 0.0f,	// v0 red
 		  0.0f, -0.5f,  0.0f,	0.0f,  0.0f, 1.0f,	// v1 blue
 		-0.25f,  0.0f,  0.0f,	0.0f , 1.0f, 0.0f,	// v2 green
 
-		// Front: Bottom Right
-		  0.0f, -0.5f,  0.0f,	1.0f,  0.0f, 0.0f,	// v3 red
-		  0.5f, -0.5f,  0.0f,	1.0f, 0.63f, 0.0f,	// v4 gold
-		 0.25f,  0.0f,  0.0f,	0.0f,  1.0f, 1.0f,	// v5 cyan
-
-		// Front: Bottom Right
-		 0.25f,  0.0f,  0.0f,	0.5f,  0.0f, 0.5f,	// v6 magenta
-		  0.0f,  0.5f,  0.0f,	0.0f,  0.5f, 1.0f,	// v7 dark blue
-		-0.25f,  0.0f,  0.0f,	1.0f , 1.0f, 0.0f	// v8 yellow
+//		// Front: Bottom Right triangle
+//		  0.0f, -0.5f,  0.0f,	1.0f,  0.0f, 0.0f,	// v3 red
+//		  0.5f, -0.5f,  0.0f,	1.0f, 0.63f, 0.0f,	// v4 gold
+//		 0.25f,  0.0f,  0.0f,	0.0f,  1.0f, 1.0f,	// v5 cyan
+//
+//		// Front: Bottom Right triangle
+//		 0.25f,  0.0f,  0.0f,	0.5f,  0.0f, 0.5f,	// v6 magenta
+//		  0.0f,  0.5f,  0.0f,	0.0f,  0.5f, 1.0f,	// v7 dark blue
+//		-0.25f,  0.0f,  0.0f,	1.0f , 1.0f, 0.0f	// v8 yellow
 
 	};
 

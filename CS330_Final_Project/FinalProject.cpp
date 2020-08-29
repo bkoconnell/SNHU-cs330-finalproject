@@ -65,9 +65,13 @@ GLint mod = 0; // initialize mod variable for glutGetModifiers()
 // Projection Toggle global variable
 int toggleProjection = 1; // Perspective view = 1;  Ortho view = 0
 
-/*	Partial credit for code idea on projection toggle goes to Nexusone from Khronos forum:
+/*	Partial credit for code idea on Toggle goes to Nexusone from Khronos forum (although I'm sure there are others to credit as well):
 *	https://community.khronos.org/t/switching-between-ortho-and-perspective-views/31561
 */
+
+// Projection Toggle global variable
+int toggleWireframe = 0; // Wireframe Off (a.k.a. Fill) = 0;  Wireframe On = 1  (use Wireframe On to view lines drawn)
+int toggleVertices = 0; // Vertices Off (a.k.a. Fill) = 0;  Vertices On = 1  (use Vertices On to view vertices drawn)
 
 
 // Subject position and scale
@@ -334,10 +338,31 @@ void URenderGraphics(void){
     glActiveTexture(GL_TEXTURE0); // texture unit 0 is active
     glBindTexture(GL_TEXTURE_2D, texture); // bind texture to texture unit 0
 
-//	// polygon mode: confirm arrays drawn (optional check for new vertices... COMMENT OUT once confirmed)
-//	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-    glDrawArrays(GL_TRIANGLES, 0, 18);	// Draw the primitives / pyramid
+
+   /* TOGGLE VIEWS for WIREFRAME or VERTICES or NORMAL (FILLED/TEXTURED) */
+    // toggles view for Wireframe ('w') to see lines drawn
+    if(toggleWireframe == 0){
+    	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // Wireframe OFF
+
+    	// when Wireframe is OFF  then Vertices can be toggled
+    	if(toggleVertices == 0){
+        	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // Vertices OFF
+        }
+        else{
+        	glPolygonMode(GL_FRONT_AND_BACK, GL_POINT); // Vertices ON
+        }
+
+    }
+    else{
+    	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Wireframe ON
+    }
+
+
+
+
+    /* DRAW PRIMITIVES (Pyramid) */
+    glDrawArrays(GL_TRIANGLES, 0, 18);
 
     glBindVertexArray(0); // Deactivate the Pyramid Vertex Array Object
 
@@ -676,21 +701,27 @@ void UGenerateTexture(){
 /* implements the UKeyboard function */
 void UKeyboard(unsigned char key, GLint x, GLint y){
 
+	// Keyboard Input options (standard keys)
 	switch(key){
 
+		// Help menu
 		case 'h':
 		case 'H':
-			cout << "\n"
+			cout << "\n\nHELP MENU:\n\n"
 					"ALT + Left Mouse Button + Mouse Movement \n"
-					"will Orbit the camera around the cube. \n\n"
+					"will Orbit the camera around the object. \n\n"
 					"ALT + Right Mouse Button + Mouse Upward Movement \n"
 					"will Zoom Out. \n\n"
 					"ALT + Right Mouse Button + Mouse Downward Movement \n"
 					"will Zoom In. \n\n"
-					"Press 'P' to toggle camera Projections.\n\n"
+					"Press 'P' to toggle camera Projections (Perspective vs. Ortho)\n"
+					"Default Projection = Perspective\n\n"
+			        "Press 'V' to toggle Vertices ON and OFF (Note: Wireframe must be OFF).\n\n"
+			        "Press 'W' to toggle Wireframe ON and OFF (Note: Vertices must be OFF).\n\n"
 					"Press 'Q' to Quit the program. \n" << endl;
 			break;
 
+		// Projection View toggle
 		case 'p':
 		case 'P':
 			toggleProjection = abs(toggleProjection - 1);
@@ -702,6 +733,43 @@ void UKeyboard(unsigned char key, GLint x, GLint y){
 			}
 			break;
 
+		// Vertex Polygon Mode toggle
+		case 'v':
+		case 'V':
+			if(toggleWireframe == 1){
+				cout << "\nUnable to toggle Vertices while Wireframe is on.\n"
+						"Press 'w' to toggle wireframe off, then try again.\n" << endl;
+			}
+			else{
+			    toggleVertices = abs(toggleVertices - 1);
+				if(toggleVertices == 1){
+					cout << "Vertices turned ON" << endl;
+				}
+	            else{
+				    cout << "Vertices turned OFF" << endl;
+		        }
+			}
+			break;
+
+		// Wireframe Polygon Mode toggle
+		case 'w':
+		case 'W':
+			if(toggleVertices == 1){
+				cout << "\nUnable to toggle Wireframe while Vertices is on.\n"
+						"Press 'v' to toggle vertices off, then try again.\n" << endl;
+			}
+			else{
+			    toggleWireframe = abs(toggleWireframe - 1);
+				if(toggleWireframe == 1){
+					cout << "Wireframe turned ON" << endl;
+				}
+	            else{
+				    cout << "Wireframe turned OFF" << endl;
+		        }
+			}
+			break;
+
+		// End Program
 		case 'q':
 		case 'Q':
 			cout << "\nGoodbye!!" << endl;

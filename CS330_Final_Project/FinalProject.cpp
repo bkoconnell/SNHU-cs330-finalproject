@@ -62,16 +62,16 @@ GLfloat deltaY = 0.0; // used to determine Y direction for right-mouse-click IF 
 GLfloat previousY = 0.0; // used to determine Y direction for right-mouse-click IF statement
 GLint mod = 0; // initialize mod variable for glutGetModifiers()
 
-// Projection Toggle global variable
+// Global Variable for Projection matrix toggle
 int toggleProjection = 1; // Perspective view = 1;  Ortho view = 0
 
 /*	Partial credit for code idea on Toggle goes to Nexusone from Khronos forum (although I'm sure there are others to credit as well):
 *	https://community.khronos.org/t/switching-between-ortho-and-perspective-views/31561
 */
 
-// Projection Toggle global variable
-int toggleWireframe = 0; // Wireframe Off (a.k.a. Fill) = 0;  Wireframe On = 1  (use Wireframe On to view lines drawn)
-int toggleVertices = 0; // Vertices Off (a.k.a. Fill) = 0;  Vertices On = 1  (use Vertices On to view vertices drawn)
+// Global Variables for gl_polygonMode Toggle
+int toggleWireframe = 0; // 0 = Wireframe OFF (a.k.a. Fill = ON);  Wireframe ON = 1  (use Wireframe ON to view lines drawn)
+int toggleVertices = 0; // 0 = Vertices OFF (a.k.a. Fill = ON);  Vertices ON = 1  (use Vertices ON to view vertices drawn)
 
 
 // Subject position and scale
@@ -95,7 +95,7 @@ glm::vec3 CameraForwardZ = glm::vec3(0.0f, 0.0f, -1.0f); // temporary Z unit vec
 glm::vec3 front; // temporary z unit vector for mouse
 
 
-/* Initialize Functions for window, graphics, shaders, buffers, textures, keyboard & mouse*/
+/* Initialize Functions for window, graphics, shaders, buffers, textures, keyboard & mouse */
 void UResizeWindow(int, int);
 void URenderGraphics(void);
 void UCreateShader(void);
@@ -105,66 +105,61 @@ void UKeyboard(unsigned char key, int x, int y);
 void UMouseActiveMotion(int x, int y);
 void UMouseClick(int button, int state, int x, int y);
 
-/* Pyramid Vertex Shader Source Code */
+
+
+/* pyramid Vertex Shader SOURCE CODE */
 const GLchar * pyramidVertexShaderSource = GLSL(330,
         layout (location = 0) in vec3 position; // Vertex data from Vertex Attrib Pointer 0
         layout (location = 1) in vec3 normal; // VAP position 1 for normals
         layout (location = 2) in vec2 textureCoordinate; // texture data from vertex attrib pointer 2
 
-        out vec3 FragmentPos; // For outgoing color / pixels to fragment shader
+        out vec3 FragmentPos; // For outgoing fragment / pixels to fragment shader
         out vec3 Normal; // For outgoing normals to fragment shader
         out vec2 mobileTextureCoordinate; // variable to transfer texture coordinate data to the fragment shader
 
 
-        // global variables for the transform matrices
+        // Uniform/Global variables for the transform matrices
         uniform mat4 model;
         uniform mat4 view;
         uniform mat4 projection;
 
         void main(){
         	gl_Position = projection * view * model * vec4(position, 1.0f); // transforms vertices to clip coordinates
-
-        	FragmentPos = vec3(model * vec4(position, 1.0f)); // Gets fragment / pixel position in world space only (exclude view and projection)
-
-        	Normal = mat3(transpose(inverse(model))) *  normal; // get normal vectors in world space only and exclude normal translation properties
-
-        	mobileTextureCoordinate = vec2(textureCoordinate.x, 1 - textureCoordinate.y); // flips the texture horizontal
+            FragmentPos = vec3(model * vec4(position, 1.0f)); // Gets fragment / pixel position in world space only (exclude view and projection)
+            Normal = mat3(transpose(inverse(model))) *  normal; // get normal vectors in world space only and exclude normal translation properties
+            mobileTextureCoordinate = vec2(textureCoordinate.x, 1 - textureCoordinate.y); // flips the texture horizontal
         }
 );
 
 
-
-/* Pyramid Fragment Shader Source Code */
+/* pyramid Fragment Shader SOURCE CODE */
 const GLchar * pyramidFragmentShaderSource = GLSL(330,
 
         in vec3 FragmentPos; // incoming fragment position
         in vec3 Normal; // incoming normals
         in vec2 mobileTextureCoordinate; // incoming texture coordinate
 
-        out vec4 pyramidColor; // outgoing pyramid color to the GPU
+        out vec4 pyramidColor; // outgoing pyramid color/lighting to the GPU
 
-        // Uniform / Global variables for light color, light position, and camera/view position
+        // Uniform/Global variables for light color, light position, and camera/view position
         uniform vec3 lightColor;
         uniform vec3 lightPos;
         uniform vec3 viewPosition;
-
         uniform sampler2D uTexture; // for working with multiple textures
 
         void main(){
 
-            /* Phong lighting model calculations to generate ambient, diffuse, and specular components */
+          /* Phong lighting model calculations to generate ambient, diffuse, and specular components */
 
             // Calculate Ambient Lighting
             float ambientStrength = 0.1f; // Set ambient or global lighting strength
             vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
-
 
             // Calculate Diffuse Lighting
             vec3 norm = normalize(Normal); // Normalize vectors to 1 unit
             vec3 lightDirection = normalize(lightPos - FragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on
             float impact = max(dot(norm, lightDirection), 0.0); // Calculate diffuse impact by generating dot product of normal and light
             vec3 diffuse = impact * lightColor; // Generate diffuse light color
-
 
             // Calculate Specular lighting
             float specularIntensity = 0.8f; // Set specular light strength
@@ -178,60 +173,61 @@ const GLchar * pyramidFragmentShaderSource = GLSL(330,
             // Calculate phong result
             vec3 objectColor = texture(uTexture, mobileTextureCoordinate).xyz;
             vec3 phong = (ambient + diffuse) * objectColor + specular;
-            pyramidColor = vec4(phong, 1.0f); // Send lighting results to GPU
 
+            // Send lighting results to GPU
+            pyramidColor = vec4(phong, 1.0f);
         }
 );
 
 
-/* Lamp Shader Source Code */
+/* lamp Vertex Shader SOURCE CODE */
 const GLchar * lampVertexShaderSource = GLSL(330,
 
         layout (location = 0) in vec3 position; // VAP position 0 for vertex position data
 
-        // Uniform / Global variables for the transform matrices
+        // Uniform/Global variables for the transform matrices
         uniform mat4 model;
         uniform mat4 view;
         uniform mat4 projection;
 
         void main(){
-
             gl_Position = projection * view *model * vec4(position, 1.0f); // Transforms vertices into clip coordinates
         }
 );
 
 
-/* Fragment Shader Source Code */
+/* lamp Fragment Shader SOURCE CODE */
 const GLchar * lampFragmentShaderSource = GLSL(330,
 
-        out vec4 color; // outgoing lamp color (smaller pyramid) to the GPU
+        out vec4 color; // variable for outgoing lamp color to the GPU
 
         void main(){
-
+        	// send lamp color to GPU
             color = vec4(1.0f); // Set color to white (1.0f, 1.0f, 1.0f) with alpha 1.0
-
         }
 );
 
 
-/* main program */
+
+
+/* MAIN PROGRAM */
 int main(int argc, char* argv[]){
 
+	glutInit(&argc, argv); // initializes freeGLUT library
+	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA); // memory buffer setup for display
+	glutInitWindowSize(WindowWidth, WindowHeight); // specifies display window's width & height
+	glutCreateWindow(WINDOW_TITLE); // Creates Display Window
 
-	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
-	glutInitWindowSize(WindowWidth, WindowHeight);
-	glutCreateWindow(WINDOW_TITLE);
+	glutReshapeFunc(UResizeWindow); // function to resize display window as needed
 
-	glutReshapeFunc(UResizeWindow);
-
+	// confirms GLEW initializes
 	glewExperimental = GL_TRUE;
 	if (glewInit()!= GLEW_OK){
 		std::cout << "Failed to initialize GLEW" << std::endl;
 		return -1;
 	}
 
-	// Beginning console output
+	// Program Start: console text output for user
 	cout << "To start: \n\n"
 			"Hold ALT key and LEFT mouse button \n"
 			"until image appears. \n\n"
@@ -239,16 +235,17 @@ int main(int argc, char* argv[]){
 			"Press the 'H' key for additional instructions \n"
 			"once the image appears" << endl;
 
-	UCreateShader();
-	UCreateBuffers();
-	UGenerateTexture();
 
-	glClearColor(0.0f, 5.0f, 1.0f, 1.0f); // set background color
+	UCreateShader(); // create Shaders
+	UCreateBuffers(); // create Buffers
+	UGenerateTexture(); // generate Textures
+
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // set background color (black)
 
 	glutDisplayFunc(URenderGraphics); // renders graphics on the screen
 
 	// keyboard & mouse functions
-	glutKeyboardFunc(UKeyboard); // detects key press
+	glutKeyboardFunc(UKeyboard); // detects key press from keyboard
 	glutMotionFunc(UMouseActiveMotion); // detects mouse movement & mouse click
 	glutMouseFunc(UMouseClick); // detects mouse click
 
@@ -275,24 +272,22 @@ void URenderGraphics(void){
 
     glEnable(GL_DEPTH_TEST); // enable Z depth
 	glDepthFunc(GL_LESS); // accept fragment if closer to the camera than the former one
-
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clears the screen
+	glEnable(GL_CULL_FACE); // enables cull facing so only "front-facing" graphics are rendered (a.k.a. graphics within visible viewing)
 
-    // enable cull facing
-//	glEnable(GL_CULL_FACE);
-
-    CameraForwardZ = front; // replaces camera forward vector with Radians normalized as a unit vector
+	// replaces camera forward vector with Radians normalized as a unit vector
+	CameraForwardZ = front;
 
     // initialize variables for matrix uniforms
     GLint modelLoc, viewLoc, projLoc, uTextureLoc, lightColorLoc, lightPositionLoc, viewPositionLoc;
 
     // initialize transformation matrices
-    glm::mat4 model;
-    glm::mat4 view;
-    glm::mat4 projection;
+    glm::mat4 model, view, projection;
 
 
-    glUseProgram(pyramidShaderProgram); // use the pyramid shader program
+
+  /* PYRAMID SHADER PROGRAM */
+    glUseProgram(pyramidShaderProgram);
     glBindVertexArray(PyramidVAO); // activate the pyramid vertex array object for rendering/transforming
 
     // Transform the pyramid
@@ -304,8 +299,8 @@ void URenderGraphics(void){
     view = glm::lookAt(cameraPosition - CameraForwardZ, cameraPosition, CameraUpY);
 
 
-   /* TOGGLE PROJECTION */
-    // initiates projection toggle between Perspective view and Ortho view..
+     /* Projection Matrix Toggle */
+    // toggles projection matrix between Perspective and Ortho
    	if(toggleProjection == 1){
     	projection = glm::perspective(45.0f, (GLfloat)WindowWidth / (GLfloat)WindowHeight, 0.1f, 100.0f);
    	}
@@ -313,155 +308,147 @@ void URenderGraphics(void){
     	projection = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, 0.1f, 100.0f);
    	}
 
-    // Reference matrix uniforms from the pyramid Shader program
+    // Reference matrix uniforms from the pyramid's Vertex Shader ...  Assign location to variable
     modelLoc = glGetUniformLocation(pyramidShaderProgram, "model");
     viewLoc = glGetUniformLocation(pyramidShaderProgram, "view");
     projLoc = glGetUniformLocation(pyramidShaderProgram, "projection");
-
-    // Pass matrix data to the pyramid Shader program's matrix uniforms
-    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
-    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
-
-    // Reference matrix uniforms from the pyramid Shader program for the pyramid color, light color, light position, and camera position
+    // Reference matrix uniforms from the pyramid's Fragment Shader ...  Assign location to variable
     uTextureLoc = glGetUniformLocation(pyramidShaderProgram, "uTexture");
     lightColorLoc = glGetUniformLocation(pyramidShaderProgram, "lightColor");
     lightPositionLoc = glGetUniformLocation(pyramidShaderProgram, "lightPos");
     viewPositionLoc = glGetUniformLocation(pyramidShaderProgram, "viewPosition");
 
-    // Pass color, light, and camera data to the pyramid Shader programs corresponding uniforms
-    glUniform1i(uTextureLoc, 0); // texture unit 0
+    // Pass matrix data to the pyramid's Vertex Shader matrix uniforms
+    glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
+    glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
+    glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+    // Pass matrix data to the pyramid's Fragment Shader matrix uniforms
+    glUniform1i(uTextureLoc, 0); // (texture unit 0)
     glUniform3f(lightColorLoc, lightColor.r, lightColor.g, lightColor.b);
     glUniform3f(lightPositionLoc, lightPosition.x, lightPosition.y, lightPosition.z);
     glUniform3f(viewPositionLoc, cameraPosition.x, cameraPosition.y, cameraPosition.z);
 
-    glActiveTexture(GL_TEXTURE0); // texture unit 0 is active
-    glBindTexture(GL_TEXTURE_2D, texture); // bind texture to texture unit 0
+
+    // Activate texture unit ... Bind texture to texture unit
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture);
 
 
-
-   /* TOGGLE VIEWS for WIREFRAME or VERTICES or NORMAL (FILLED/TEXTURED) */
-    // toggles view for Wireframe ('w') to see lines drawn
+     /* TOGGLE POLYGONS for WIREFRAME or VERTICES or DEFAULT (default = FILLED/TEXTURED) */
+    // toggles Wireframe ('w') to see lines drawn
     if(toggleWireframe == 0){
     	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // Wireframe OFF
 
-    	// when Wireframe is OFF  then Vertices can be toggled
+    	// Vertices can be toggled when Wireframe = OFF
     	if(toggleVertices == 0){
         	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); // Vertices OFF
         }
         else{
         	glPolygonMode(GL_FRONT_AND_BACK, GL_POINT); // Vertices ON
         }
-
     }
     else{
     	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); // Wireframe ON
     }
 
 
-
-
-    /* DRAW PRIMITIVES (Pyramid) */
+    // DRAW PRIMITIVE (PYRAMID)
     glDrawArrays(GL_TRIANGLES, 0, 18);
-
     glBindVertexArray(0); // Deactivate the Pyramid Vertex Array Object
 
 
 
-    glUseProgram(lampShaderProgram); // use Lamp Shader program
+
+  /* LAMP SHADER PROGRAM */
+    glUseProgram(lampShaderProgram);
     glBindVertexArray(LightVAO); // activate lamp vertex array object for rendering/transforming
 
-    // Transform the smaller pyramid (lamp) used as a visual cue for the light source
+    // Transform the lamp used as a visual cue for the light source
     model = glm::translate(model, lightPosition);
     model = glm::scale(model, lightScale);
 
-    // Reference matrix uniforms from the Lamp Shader program
+    // Reference matrix uniforms from the lamp's Vertex Shader ... Assign location to variable
     modelLoc = glGetUniformLocation(lampShaderProgram, "model");
     viewLoc = glGetUniformLocation(lampShaderProgram, "view");
     projLoc = glGetUniformLocation(lampShaderProgram, "projection");
 
-    // Pass matrix uniforms from the Lamp Shader Program
+    // Pass matrix data to the lamp's Vertex Shader matrix uniforms
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
 
-    glBindTexture(GL_TEXTURE_2D, texture); // activate texture
 
-    // Draws the triangles
+    // DRAW PRIMITIVE (LAMP)
     glDrawArrays(GL_TRIANGLES, 0, 18);
 
     glBindVertexArray(0); // Deactivate the Lamp Vertex Array Object
 
-    glutPostRedisplay();
+    glutPostRedisplay(); // signals main loop to draw the next frame
     glutSwapBuffers(); // Flips the back buffer with the front buffer every frame. Similar to GL Flush
 
 }
 
+
 /* Create the Shader program */
 void UCreateShader()
 {
+    // FIXME: give credit to website that provided code for compile/link Error Check
+	// initialize variables for shader compile verification & shader link verification
+	int success;
+	char infoLog[512];
 
-    // Pyramid Vertex shader
+  /* PYRAMID */
+    // Vertex Shader
     GLint pyramidVertexShader = glCreateShader(GL_VERTEX_SHADER); // Creates the Vertex shader
     glShaderSource(pyramidVertexShader, 1, &pyramidVertexShaderSource, NULL); // Attaches the Vertex shader to the source code
     glCompileShader(pyramidVertexShader); // Compiles the Vertex shader
-
-	// check for shader compile errors
-	int success;
-	char infoLog[512];
+    // verify no shader compile errors
 	glGetShaderiv(pyramidVertexShader, GL_COMPILE_STATUS, &success);
 	if (!success){
 	    glGetShaderInfoLog(pyramidVertexShader, 512, NULL, infoLog);
 	    std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
 	}
 
-
-    // Pyramid Fragment Shader
+    // Fragment Shader
     GLint pyramidFragmentShader = glCreateShader(GL_FRAGMENT_SHADER); // Creates the Fragment Shader
     glShaderSource(pyramidFragmentShader, 1, &pyramidFragmentShaderSource, NULL); // Attaches the Fragment shader to the source code
     glCompileShader(pyramidFragmentShader); // Compiles the Fragment Shader
-
-    // check for shader compile errors
+    // verify no shader compile errors
     glGetShaderiv(pyramidFragmentShader, GL_COMPILE_STATUS, &success);
-    if (!success)
-    {
+    if (!success){
         glGetShaderInfoLog(pyramidFragmentShader, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
 
-
-    // Pyramid Shader program
+    // Shader program
     pyramidShaderProgram = glCreateProgram(); // Creates the Shader program and returns an id
     glAttachShader(pyramidShaderProgram, pyramidVertexShader); // Attaches Vertex shader to the Shader program
     glAttachShader(pyramidShaderProgram, pyramidFragmentShader); // Attaches Fragment shader to the Shader program
     glLinkProgram(pyramidShaderProgram); // Link Vertex and Fragment shaders to the Shader program
-
-    // check for linking errors
+    // verify no link errors
     glGetProgramiv(pyramidShaderProgram, GL_LINK_STATUS, &success);
-    if (!success) {
+    if (!success){
         glGetProgramInfoLog(pyramidShaderProgram, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
     }
 
-
-    // Delete the Vertex and Fragment shaders once linked
+    // Delete the pyramid Vertex and Fragment shaders once linked
     glDeleteShader(pyramidVertexShader);
     glDeleteShader(pyramidFragmentShader);
 
 
-
-
-    // Lamp Vertex shader
+  /* LAMP */
+    // Vertex Shader
     GLint lampVertexShader = glCreateShader(GL_VERTEX_SHADER); // Creates the Vertex shader
     glShaderSource(lampVertexShader, 1, &lampVertexShaderSource, NULL); // Attaches the Vertex shader to the source code
     glCompileShader(lampVertexShader); // Compiles the Vertex shader
 
-    // Lamp Fragment shader
+    // Fragment Shader
     GLint lampFragmentShader = glCreateShader(GL_FRAGMENT_SHADER); // Creates the Fragment shader
     glShaderSource(lampFragmentShader, 1, &lampFragmentShaderSource, NULL); // Attaches the Fragment shader to the source code
     glCompileShader(lampFragmentShader); // Compiles the Fragment shader
 
-    // Lamp Shader Program
+    // Shader Program
     lampShaderProgram = glCreateProgram(); // Creates the Shader program and returns an id
     glAttachShader(lampShaderProgram, lampVertexShader); // Attach Vertex shader to the Shader program
     glAttachShader(lampShaderProgram, lampFragmentShader); // Attach Fragment shader to the Shader program
@@ -470,7 +457,6 @@ void UCreateShader()
     // Delete the lamp shaders once linked
     glDeleteShader(lampVertexShader);
     glDeleteShader(lampFragmentShader);
-
 }
 
 

@@ -37,9 +37,9 @@ using namespace std; // standard namespace
 
 
 /* variable declarations for shader, window size initialize, buffer and array objects */
-GLint pyramidShaderProgram, lampShaderProgram;
+GLint triforceShaderProgram, lampShaderProgram;
 GLint WindowWidth = 800, WindowHeight = 600;
-GLuint VBO, PyramidVAO, LightVAO, EBO, texture;
+GLuint VBO, TriforceVAO, LightVAO, EBO, texture;
 
 // global variable declarations for mouse, keyboard, camera/graphics, etc.
 GLfloat degrees = glm::radians(-45.0f); // converts float to degrees
@@ -67,12 +67,12 @@ int toggleWireframe = 0; // 0 = Wireframe OFF (a.k.a. Fill = ON);  Wireframe ON 
 int toggleVertices = 0; // 0 = Vertices OFF (a.k.a. Fill = ON);  Vertices ON = 1  (use Vertices ON to view vertices drawn)
 
 
-// Subject position and scale
-glm::vec3 pyramidPosition(0.0f, 0.0f, 0.0f); // place object at center of viewpoint
-glm::vec3 pyramidRotation(0.0f, 1.0f, 0.0f); // rotate the object 45 degrees on Y axis
-glm::vec3 pyramidScale(2.0f); // increase object size by 2 units
+// Triforce position and scale
+glm::vec3 triforcePosition(0.0f, 0.0f, 0.0f); // place object at center of viewpoint
+glm::vec3 triforceRotation(0.0f, 1.0f, 0.0f); // rotate the object on Y axis
+glm::vec3 triforceScale(2.0f); // increase object size by 2 units
 
-// Pyramid and Light color
+// Triforce and Light color
 glm::vec3 objectColor(1.0f, 1.0f, 1.0f);
 glm::vec3 lightColor(0.8f, 1.0f, 0.8f);
 
@@ -100,8 +100,8 @@ void UMouseClick(int button, int state, int x, int y);
 
 
 
-/* pyramid Vertex Shader SOURCE CODE */
-const GLchar * pyramidVertexShaderSource = GLSL(330,
+/* triforce Vertex Shader SOURCE CODE */
+const GLchar * triforceVertexShaderSource = GLSL(330,
         layout (location = 0) in vec3 position; // Vertex data from Vertex Attrib Pointer 0
         layout (location = 1) in vec3 normal; // VAP position 1 for normals
         layout (location = 2) in vec2 textureCoordinate; // texture data from vertex attrib pointer 2
@@ -125,14 +125,14 @@ const GLchar * pyramidVertexShaderSource = GLSL(330,
 );
 
 
-/* pyramid Fragment Shader SOURCE CODE */
-const GLchar * pyramidFragmentShaderSource = GLSL(330,
+/* triforce Fragment Shader SOURCE CODE */
+const GLchar * triforceFragmentShaderSource = GLSL(330,
 
         in vec3 FragmentPos; // incoming fragment position
         in vec3 Normal; // incoming normals
         in vec2 mobileTextureCoordinate; // incoming texture coordinate
 
-        out vec4 pyramidColor; // outgoing pyramid color/lighting to the GPU
+        out vec4 triforceColor; // outgoing triforce color/lighting to the GPU
 
         // Uniform variables for light color, light position, and camera/view position
         uniform vec3 lightColor;
@@ -168,7 +168,7 @@ const GLchar * pyramidFragmentShaderSource = GLSL(330,
             vec3 phong = (ambient + diffuse) * objectColor + specular;
 
             // Send lighting results to GPU
-            pyramidColor = vec4(phong, 1.0f);
+            triforceColor = vec4(phong, 1.0f);
         }
 );
 
@@ -245,7 +245,7 @@ int main(int argc, char* argv[]){
 	glutMainLoop(); // enters GLUT event processing loop
 
 	// destroys buffer objects once used
-	glDeleteVertexArrays(1, &PyramidVAO);
+	glDeleteVertexArrays(1, &TriforceVAO);
 	glDeleteVertexArrays(1, &LightVAO);
 	glDeleteBuffers(1, &VBO);
 
@@ -253,7 +253,7 @@ int main(int argc, char* argv[]){
 }
 
 
-// resize the window
+/* resize the window */
 void UResizeWindow(int w, int h){
 	WindowWidth = w, WindowHeight = h;
 	glViewport(0, 0, WindowWidth, WindowHeight);
@@ -279,14 +279,14 @@ void URenderGraphics(void){
 
 
 
-  /* PYRAMID SHADER PROGRAM */
-    glUseProgram(pyramidShaderProgram);
-    glBindVertexArray(PyramidVAO); // activate the pyramid vertex array object for rendering/transforming
+  /* TRIFORCE SHADER PROGRAM */
+    glUseProgram(triforceShaderProgram);
+    glBindVertexArray(TriforceVAO); // activate the triforce vertex array object for rendering/transforming
 
-    // Transform the pyramid
-    model = glm::translate(model, pyramidPosition);
-    model = glm::rotate(model, degrees, pyramidRotation);
-    model = glm::scale(model, pyramidScale);
+    // Transform the triforce
+    model = glm::translate(model, triforcePosition);
+    model = glm::rotate(model, degrees, triforceRotation);
+    model = glm::scale(model, triforceScale);
 
     // Transform the camera
     view = glm::lookAt(cameraPosition - CameraForwardZ, cameraPosition, CameraUpY);
@@ -301,21 +301,21 @@ void URenderGraphics(void){
     	projection = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, 0.1f, 100.0f);
    	}
 
-    // Reference matrix uniforms from the pyramid's Vertex Shader ...  Assign location to variable
-    modelLoc = glGetUniformLocation(pyramidShaderProgram, "model");
-    viewLoc = glGetUniformLocation(pyramidShaderProgram, "view");
-    projLoc = glGetUniformLocation(pyramidShaderProgram, "projection");
-    // Reference matrix uniforms from the pyramid's Fragment Shader ...  Assign location to variable
-    uTextureLoc = glGetUniformLocation(pyramidShaderProgram, "uTexture");
-    lightColorLoc = glGetUniformLocation(pyramidShaderProgram, "lightColor");
-    lightPositionLoc = glGetUniformLocation(pyramidShaderProgram, "lightPos");
-    viewPositionLoc = glGetUniformLocation(pyramidShaderProgram, "viewPosition");
+    // Reference matrix uniforms from the triforce's Vertex Shader ...  Assign location to variable
+    modelLoc = glGetUniformLocation(triforceShaderProgram, "model");
+    viewLoc = glGetUniformLocation(triforceShaderProgram, "view");
+    projLoc = glGetUniformLocation(triforceShaderProgram, "projection");
+    // Reference matrix uniforms from the triforce's Fragment Shader ...  Assign location to variable
+    uTextureLoc = glGetUniformLocation(triforceShaderProgram, "uTexture");
+    lightColorLoc = glGetUniformLocation(triforceShaderProgram, "lightColor");
+    lightPositionLoc = glGetUniformLocation(triforceShaderProgram, "lightPos");
+    viewPositionLoc = glGetUniformLocation(triforceShaderProgram, "viewPosition");
 
-    // Pass matrix data to the pyramid's Vertex Shader matrix uniforms
+    // Pass matrix data to the triforce's Vertex Shader matrix uniforms
     glUniformMatrix4fv(modelLoc, 1, GL_FALSE, glm::value_ptr(model));
     glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
     glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
-    // Pass matrix data to the pyramid's Fragment Shader matrix uniforms
+    // Pass matrix data to the triforce's Fragment Shader matrix uniforms
     glUniform1i(uTextureLoc, 0); // (texture unit 0)
     glUniform3f(lightColorLoc, lightColor.r, lightColor.g, lightColor.b);
     glUniform3f(lightPositionLoc, lightPosition.x, lightPosition.y, lightPosition.z);
@@ -344,9 +344,9 @@ void URenderGraphics(void){
     }
 
 
-    // DRAW PRIMITIVE (PYRAMID)
+    // DRAW PRIMITIVE (TRIFORCE)
     glDrawArrays(GL_TRIANGLES, 0, 18);
-    glBindVertexArray(0); // Deactivate the Pyramid Vertex Array Object
+    glBindVertexArray(0); // Deactivate the Triforce Vertex Array Object
 
 
 
@@ -392,44 +392,44 @@ void UCreateShader()
 	int success;
 	char infoLog[512];
 
-  /* PYRAMID */
+  /* TRIFORCE */
     // Vertex Shader
-    GLint pyramidVertexShader = glCreateShader(GL_VERTEX_SHADER); // Creates the Vertex shader
-    glShaderSource(pyramidVertexShader, 1, &pyramidVertexShaderSource, NULL); // Attaches the Vertex shader to the source code
-    glCompileShader(pyramidVertexShader); // Compiles the Vertex shader
+    GLint triforceVertexShader = glCreateShader(GL_VERTEX_SHADER); // Creates the Vertex shader
+    glShaderSource(triforceVertexShader, 1, &triforceVertexShaderSource, NULL); // Attaches the Vertex shader to the source code
+    glCompileShader(triforceVertexShader); // Compiles the Vertex shader
     // vertex shader compile log check:
-	glGetShaderiv(pyramidVertexShader, GL_COMPILE_STATUS, &success);
+	glGetShaderiv(triforceVertexShader, GL_COMPILE_STATUS, &success);
 	if (!success){
-	    glGetShaderInfoLog(pyramidVertexShader, 512, NULL, infoLog);
+	    glGetShaderInfoLog(triforceVertexShader, 512, NULL, infoLog);
 	    std::cout << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n" << infoLog << std::endl;
 	}
 
     // Fragment Shader
-    GLint pyramidFragmentShader = glCreateShader(GL_FRAGMENT_SHADER); // Creates the Fragment Shader
-    glShaderSource(pyramidFragmentShader, 1, &pyramidFragmentShaderSource, NULL); // Attaches the Fragment shader to the source code
-    glCompileShader(pyramidFragmentShader); // Compiles the Fragment Shader
+    GLint triforceFragmentShader = glCreateShader(GL_FRAGMENT_SHADER); // Creates the Fragment Shader
+    glShaderSource(triforceFragmentShader, 1, &triforceFragmentShaderSource, NULL); // Attaches the Fragment shader to the source code
+    glCompileShader(triforceFragmentShader); // Compiles the Fragment Shader
     // fragment shader compile log check:
-    glGetShaderiv(pyramidFragmentShader, GL_COMPILE_STATUS, &success);
+    glGetShaderiv(triforceFragmentShader, GL_COMPILE_STATUS, &success);
     if (!success){
-        glGetShaderInfoLog(pyramidFragmentShader, 512, NULL, infoLog);
+        glGetShaderInfoLog(triforceFragmentShader, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n" << infoLog << std::endl;
     }
 
     // Shader program
-    pyramidShaderProgram = glCreateProgram(); // Creates the Shader program and returns an id
-    glAttachShader(pyramidShaderProgram, pyramidVertexShader); // Attaches Vertex shader to the Shader program
-    glAttachShader(pyramidShaderProgram, pyramidFragmentShader); // Attaches Fragment shader to the Shader program
-    glLinkProgram(pyramidShaderProgram); // Link Vertex and Fragment shaders to the Shader program
+    triforceShaderProgram = glCreateProgram(); // Creates the Shader program and returns an id
+    glAttachShader(triforceShaderProgram, triforceVertexShader); // Attaches Vertex shader to the Shader program
+    glAttachShader(triforceShaderProgram, triforceFragmentShader); // Attaches Fragment shader to the Shader program
+    glLinkProgram(triforceShaderProgram); // Link Vertex and Fragment shaders to the Shader program
     // shader program link check:
-    glGetProgramiv(pyramidShaderProgram, GL_LINK_STATUS, &success);
+    glGetProgramiv(triforceShaderProgram, GL_LINK_STATUS, &success);
     if (!success){
-        glGetProgramInfoLog(pyramidShaderProgram, 512, NULL, infoLog);
+        glGetProgramInfoLog(triforceShaderProgram, 512, NULL, infoLog);
         std::cout << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
     }
 
-    // Delete the pyramid Vertex and Fragment shaders once linked
-    glDeleteShader(pyramidVertexShader);
-    glDeleteShader(pyramidFragmentShader);
+    // Delete the triforce Vertex and Fragment shaders once linked
+    glDeleteShader(triforceVertexShader);
+    glDeleteShader(triforceFragmentShader);
 
 
   /* LAMP */
@@ -619,11 +619,11 @@ void UCreateBuffers()
 
 
     // Generate buffer ids
-    glGenVertexArrays(1, &PyramidVAO);
+    glGenVertexArrays(1, &TriforceVAO);
     glGenBuffers(1, &VBO);
 
-    // Activate the PyramidVAO before binding and setting VBOs and VAPs
-    glBindVertexArray(PyramidVAO);
+    // Activate the TriforceVAO before binding and setting VBOs and VAPs
+    glBindVertexArray(TriforceVAO);
 
     // Activate the VBO
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -641,10 +641,10 @@ void UCreateBuffers()
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
     glEnableVertexAttribArray(2);
 
-    glBindVertexArray(0); // deactivate the pyramid VAO
+    glBindVertexArray(0); // deactivate the triforce VAO
 
-    // Generate buffer ids for lamp (smaller pyramid)
-    glGenVertexArrays(1, &LightVAO); // Vertex Array for pyramid vertex copies to serve as light source
+    // Generate buffer ids for lamp
+    glGenVertexArrays(1, &LightVAO); // Vertex Array for triforce vertex copies to serve as light source
 
     // Activate the Vertex Array Object before binding and setting any VBOs and Vertex Attribute Pointers
     glBindVertexArray(LightVAO);

@@ -1,9 +1,3 @@
-/* ADDED CAMERA FUNCTIONALITY BUT LIGHTING IS STRANGE */
-
-//FIXME: Investigate the Lighting Reflection issue
-
-
-
 /*
  * FinalProject.cpp
  *
@@ -41,7 +35,7 @@ using namespace std; // standard namespace
 #define GLSL(Version, Source) "#version " #Version "\n" #Source
 #endif
 
-//FIXME: review shader programs ,  Vertex Array Objects, etc.
+
 /* variable declarations for shader, window size initialize, buffer and array objects */
 GLint pyramidShaderProgram, lampShaderProgram;
 GLint WindowWidth = 800, WindowHeight = 600;

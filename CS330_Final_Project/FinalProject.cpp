@@ -74,11 +74,11 @@ glm::vec3 triforceScale(2.0f); // increase object size by 2 units
 
 // Triforce and Light color
 glm::vec3 objectColor(1.0f, 1.0f, 1.0f);
-glm::vec3 lightColor(0.8f, 1.0f, 0.8f);
+glm::vec3 lightColor(0.8f, 0.9f, 1.0f);
 
 // Light position and scale
 glm::vec3 lightPosition(0.5f, 0.5f, -3.0f);
-glm::vec3 lightScale(0.3f);
+glm::vec3 lightScale(0.2f);
 
 // global vector declarations for camera position, rotation, movement, etc.
 float cameraRotation = glm::radians(-25.0f);
@@ -103,10 +103,10 @@ void UMouseClick(int button, int state, int x, int y);
 /* triforce Vertex Shader SOURCE CODE */
 const GLchar * triforceVertexShaderSource = GLSL(330,
         layout (location = 0) in vec3 position; // Vertex data from Vertex Attrib Pointer 0
-        layout (location = 1) in vec3 normal; // VAP position 1 for normals
+        layout (location = 1) in vec3 normal; // VAP position 1 for normals (lighting)
         layout (location = 2) in vec2 textureCoordinate; // texture data from vertex attrib pointer 2
 
-        out vec3 FragmentPos; // For outgoing fragment / pixels to fragment shader
+        out vec3 FragPos; // For outgoing fragment / pixels to fragment shader
         out vec3 Normal; // For outgoing normals to fragment shader
         out vec2 mobileTextureCoordinate; // variable to transfer texture coordinate data to the fragment shader
 
@@ -118,7 +118,7 @@ const GLchar * triforceVertexShaderSource = GLSL(330,
 
         void main(){
         	gl_Position = projection * view * model * vec4(position, 1.0f); // transforms vertices to clip coordinates
-            FragmentPos = vec3(model * vec4(position, 1.0f)); // Gets fragment / pixel position in world space only (exclude view and projection)
+            FragPos = vec3(model * vec4(position, 1.0f)); // Gets fragment / pixel position in world space only (exclude view and projection)
             Normal = mat3(transpose(inverse(model))) *  normal; // get normal vectors in world space only and exclude normal translation properties
             mobileTextureCoordinate = vec2(textureCoordinate.x, 1 - textureCoordinate.y); // flips the texture horizontal
         }
@@ -128,7 +128,7 @@ const GLchar * triforceVertexShaderSource = GLSL(330,
 /* triforce Fragment Shader SOURCE CODE */
 const GLchar * triforceFragmentShaderSource = GLSL(330,
 
-        in vec3 FragmentPos; // incoming fragment position
+        in vec3 FragPos; // incoming fragment position
         in vec3 Normal; // incoming normals
         in vec2 mobileTextureCoordinate; // incoming texture coordinate
 
@@ -145,19 +145,19 @@ const GLchar * triforceFragmentShaderSource = GLSL(330,
           /* Phong lighting model calculations to generate ambient, diffuse, and specular components */
 
             // Calculate Ambient Lighting
-            float ambientStrength = 0.1f; // Set ambient or global lighting strength
+            float ambientStrength = 0.2f; // Set ambient lighting strength
             vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
 
             // Calculate Diffuse Lighting
             vec3 norm = normalize(Normal); // Normalize vectors to 1 unit
-            vec3 lightDirection = normalize(lightPos - FragmentPos); // Calculate distance (light direction) between light source and fragments/pixels on
-            float impact = max(dot(norm, lightDirection), 0.0); // Calculate diffuse impact by generating dot product of normal and light
+            vec3 lightDirection = normalize(lightPos - FragPos); // Calculate light's direction vector between light source & fragment position
+            float impact = max(dot(norm, lightDirection), 0.0); // Calculate diffuse impact (generate dot product of normal & light direction)
             vec3 diffuse = impact * lightColor; // Generate diffuse light color
 
             // Calculate Specular lighting
             float specularIntensity = 0.8f; // Set specular light strength
             float highlightSize = 128.0f; // Set specular highlight size
-            vec3 viewDir = normalize(viewPosition - FragmentPos); // Calculate view direction
+            vec3 viewDir = normalize(viewPosition - FragPos); // Calculate view direction
             vec3 reflectDir = reflect(-lightDirection, norm); // Calculate reflection vector
             // Calculate specular component
             float specularComponent = pow(max(dot(viewDir, reflectDir), 0.0), highlightSize);
@@ -196,7 +196,7 @@ const GLchar * lampFragmentShaderSource = GLSL(330,
 
         void main(){
         	// send lamp color to GPU
-            color = vec4(1.0f); // Set color to white (1.0f, 1.0f, 1.0f) with alpha 1.0
+            color = vec4(0.8f, 0.9f, 1.0f, 1.0f); // Set lamp color
         }
 );
 

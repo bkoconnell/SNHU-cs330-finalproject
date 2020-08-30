@@ -473,15 +473,15 @@ void UCreateBuffers()
 		-0.5f, -0.5f,  0.5f,     0.0f,  0.0f,  1.0f,    0.0f, 0.0f,
 		 0.5f, -0.5f,  0.5f,     0.0f,  0.0f,  1.0f,    1.0f, 0.0f,
 
-		 //Left Face            //Negative X Normals
-		 0.0f,  0.5f,  0.0f,    -1.0f,  0.0f,  0.0f,    0.5f, 1.0f,
-		-0.5f, -0.5f, -0.5f,    -1.0f,  0.0f,  0.0f,    0.0f, 0.0f,
-		-0.5f, -0.5f,  0.5f,    -1.0f,  0.0f,  0.0f,    1.0f, 0.0f,
-
-		 //Right Face           //Positive X Normals
+		 //Left Face            //Positive X Normals
 		 0.0f,  0.5f,  0.0f,     1.0f,  0.0f,  0.0f,    0.5f, 1.0f,
-		 0.5f, -0.5f,  0.5f,     1.0f,  0.0f,  0.0f,    0.0f, 0.0f,
-		 0.5f, -0.5f, -0.5f,     1.0f,  0.0f,  0.0f,    1.0f, 0.0f,
+		-0.5f, -0.5f, -0.5f,     1.0f,  0.0f,  0.0f,    0.0f, 0.0f,
+		-0.5f, -0.5f,  0.5f,     1.0f,  0.0f,  0.0f,    1.0f, 0.0f,
+
+		 //Right Face           //Negative X Normals
+		 0.0f,  0.5f,  0.0f,    -1.0f,  0.0f,  0.0f,    0.5f, 1.0f,
+		 0.5f, -0.5f,  0.5f,    -1.0f,  0.0f,  0.0f,    0.0f, 0.0f,
+		 0.5f, -0.5f, -0.5f,    -1.0f,  0.0f,  0.0f,    1.0f, 0.0f,
 
 		 //Bottom Face          //Negative Y Normals
 		-0.5f, -0.5f, -0.5f,     0.0f, -1.0f,  0.0f,    0.0f, 1.0f,

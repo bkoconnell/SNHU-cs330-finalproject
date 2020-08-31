@@ -107,14 +107,14 @@ const GLchar * triforceVertexShaderSource = GLSL(330,
         layout (location = 2) in vec2 textureCoordinate; // texture data from vertex attrib pointer 2
 
       // FIXME: DELETE AFTER TROUBLESHOOTING VERTICES
-    	layout (location = 3) in vec3 color;
+//    	layout (location = 3) in vec3 color;
 
         out vec3 FragPos; // For outgoing fragment / pixels to fragment shader
         out vec3 Normal; // For outgoing normals to fragment shader
         out vec2 mobileTextureCoordinate; // variable to transfer texture coordinate data to the fragment shader
 
       // FIXME: DELETE AFTER TROUBLESHOOTING VERTICES
-        out vec3 fragColor;
+//        out vec3 fragColor;
 
         // Uniform variables for the transform matrices
         uniform mat4 model;
@@ -128,7 +128,7 @@ const GLchar * triforceVertexShaderSource = GLSL(330,
             mobileTextureCoordinate = vec2(textureCoordinate.x, 1 - textureCoordinate.y); // flips the texture horizontal
 
           // FIXME: DELETE AFTER TROUBLESHOOTING VERTICES
-            fragColor = color;
+//            fragColor = color;
 
         }
 );
@@ -140,12 +140,14 @@ const GLchar * triforceFragmentShaderSource = GLSL(330,
         in vec3 FragPos; // incoming fragment position
         in vec3 Normal; // incoming normals
         in vec2 mobileTextureCoordinate; // incoming texture coordinate
-        in vec3 fragColor;
-
-//        out vec4 triforceColor; // outgoing triforce color/lighting to the GPU
 
       // FIXME: DELETE AFTER TROUBLESHOOTING VERTICES
-        out vec4 gpuColor;
+//        in vec3 fragColor;
+
+        out vec4 triforceColor; // outgoing triforce color/lighting to the GPU
+
+      // FIXME: DELETE AFTER TROUBLESHOOTING VERTICES
+//        out vec4 gpuColor;
 
         // Uniform variables for light color, light position, and camera/view position
         uniform vec3 lightColor;
@@ -181,11 +183,11 @@ const GLchar * triforceFragmentShaderSource = GLSL(330,
             vec3 phong = (ambient + diffuse) * objectColor + specular;
 
             // Send lighting results to GPU
-//            triforceColor = vec4(phong, 1.0f);
+            triforceColor = vec4(phong, 1.0f);
 
 
           // FIXME: DELETE AFTER TROUBLESHOOTING VERTICES
-      		gpuColor = vec4(fragColor, 1.0);
+//      		gpuColor = vec4(fragColor, 1.0);
         }
 );
 
@@ -474,162 +476,130 @@ void UCreateShader()
 /* creates the Buffer and Array Objects */
 void UCreateBuffers()
 {
-    // Position and Texture coordinate data for 18 triangles
+    // Position, Normals, & Texture coordinate data for triforce vertices
     GLfloat vertices[] = {
-
-//		//Positions             //Normals               //Texture Coordinates
-//
-//		//Back Face             //Negative Z Normals
-//		 0.0f,  0.5f,  0.0f,     0.0f,  0.0f, -1.0f,    0.5f, 1.0f,
-//		 0.5f, -0.5f, -0.5f,     0.0f,  0.0f, -1.0f,    0.0f, 0.0f,
-//		-0.5f, -0.5f, -0.5f,     0.0f,  0.0f, -1.0f,    1.0f, 0.0f,
-//
-//		//Front Face            //Positive Z Normals
-//		 0.0f,  0.5f,  0.0f,     0.0f,  0.0f,  1.0f,    0.5f, 1.0f,
-//		-0.5f, -0.5f,  0.5f,     0.0f,  0.0f,  1.0f,    0.0f, 0.0f,
-//		 0.5f, -0.5f,  0.5f,     0.0f,  0.0f,  1.0f,    1.0f, 0.0f,
-//
-//		 //Left Face            //Positive X Normals
-//		 0.0f,  0.5f,  0.0f,     1.0f,  0.0f,  0.0f,    0.5f, 1.0f,
-//		-0.5f, -0.5f, -0.5f,     1.0f,  0.0f,  0.0f,    0.0f, 0.0f,
-//		-0.5f, -0.5f,  0.5f,     1.0f,  0.0f,  0.0f,    1.0f, 0.0f,
-//
-//		 //Right Face           //Negative X Normals
-//		 0.0f,  0.5f,  0.0f,    -1.0f,  0.0f,  0.0f,    0.5f, 1.0f,
-//		 0.5f, -0.5f,  0.5f,    -1.0f,  0.0f,  0.0f,    0.0f, 0.0f,
-//		 0.5f, -0.5f, -0.5f,    -1.0f,  0.0f,  0.0f,    1.0f, 0.0f,
-//
-//		 //Bottom Face          //Negative Y Normals
-//		-0.5f, -0.5f, -0.5f,     0.0f, -1.0f,  0.0f,    0.0f, 1.0f,
-//		 0.5f, -0.5f, -0.5f,     0.0f, -1.0f,  0.0f,    0.0f, 0.0f,
-//		-0.5f, -0.5f,  0.5f,     0.0f, -1.0f,  0.0f,    1.0f, 1.0f,
-//		-0.5f, -0.5f,  0.5f,     0.0f, -1.0f,  0.0f,    1.0f, 1.0f,
-//		 0.5f, -0.5f, -0.5f,     0.0f, -1.0f,  0.0f,    0.0f, 0.0f,
-//		 0.5f, -0.5f,  0.5f,     0.0f, -1.0f,  0.0f,    1.0f, 0.0f,
-//
-//    };
 
 		//	Vertex data           // Normals             // Texture Coordinates
 
     /* FRONT TRIFORCE */
 		// FRONT: Bottom Left triangle
-		 -0.5f, -0.5f,  0.0f,     0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.0f, 0.0f, // v0
-		  0.0f, -0.5f,  0.0f,	  0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.0f, 0.0f, // v1
-		-0.25f,  0.0f,  0.0f,	  0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.0f, 0.0f, // v2
+		 -0.5f, -0.5f,  0.0f,     0.0f,  0.0f,  1.0f,    0.0f, 0.0f,    //1.0f, 0.0f, 0.0f, // v0
+		  0.0f, -0.5f,  0.0f,	  0.0f,  0.0f,  1.0f,    0.0f, 0.0f,    //1.0f, 0.0f, 0.0f, // v1
+		-0.25f,  0.0f,  0.0f,	  0.0f,  0.0f,  1.0f,    0.0f, 0.0f,    //1.0f, 0.0f, 0.0f, // v2
 
 		// FRONT: Bottom Right triangle
-		  0.0f, -0.5f,  0.0f,	  0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    0.0f, 1.0f, 0.0f, // v3
-		  0.5f, -0.5f,  0.0f,	  0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    0.0f, 1.0f, 0.0f, // v4
-		 0.25f,  0.0f,  0.0f,	  0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    0.0f, 1.0f, 0.0f, // v5
+		  0.0f, -0.5f,  0.0f,	  0.0f,  0.0f,  1.0f,    0.0f, 0.0f,    //0.0f, 1.0f, 0.0f, // v3
+		  0.5f, -0.5f,  0.0f,	  0.0f,  0.0f,  1.0f,    0.0f, 0.0f,    //0.0f, 1.0f, 0.0f, // v4
+		 0.25f,  0.0f,  0.0f,	  0.0f,  0.0f,  1.0f,    0.0f, 0.0f,    //0.0f, 1.0f, 0.0f, // v5
 
 		// FRONT: Top triangle
-		 0.25f,  0.0f,  0.0f,	  0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    0.0f, 0.0f, 1.0f,  // v6
-		  0.0f,  0.5f,  0.0f,	  0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    0.0f, 0.0f, 1.0f,  // v7
-		-0.25f,  0.0f,  0.0f,	  0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    0.0f, 0.0f, 1.0f,  // v8
+		 0.25f,  0.0f,  0.0f,	  0.0f,  0.0f,  1.0f,    0.0f, 0.0f,    //0.0f, 0.0f, 1.0f,  // v6
+		  0.0f,  0.5f,  0.0f,	  0.0f,  0.0f,  1.0f,    0.0f, 0.0f,    //0.0f, 0.0f, 1.0f,  // v7
+		-0.25f,  0.0f,  0.0f,	  0.0f,  0.0f,  1.0f,    0.0f, 0.0f,    //0.0f, 0.0f, 1.0f,  // v8
 
     /* BACK TRIFORCE */
 		// BACK: Bottom Left Triangle
-		 -0.5f, -0.5f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v9
-		  0.0f, -0.5f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v10
-	    -0.25f,  0.0f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v11
+		 -0.5f, -0.5f, -0.125f,   0.0f,  0.0f, -1.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v9
+		  0.0f, -0.5f, -0.125f,   0.0f,  0.0f, -1.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v10
+	    -0.25f,  0.0f, -0.125f,   0.0f,  0.0f, -1.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v11
 
 		// BACK: Bottom Right Triangle
-		  0.0f, -0.5f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v12
-		  0.5f, -0.5f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v13
-	     0.25f,  0.0f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v14
+		  0.0f, -0.5f, -0.125f,   0.0f,  0.0f, -1.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v12
+		  0.5f, -0.5f, -0.125f,   0.0f,  0.0f, -1.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v13
+	     0.25f,  0.0f, -0.125f,   0.0f,  0.0f, -1.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v14
 
 
 		// BACK: Top Triangle
-		 0.25f,  0.0f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v15
-		  0.0f,  0.5f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v16
-	    -0.25f,  0.0f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v17
+		 0.25f,  0.0f, -0.125f,   0.0f,  0.0f, -1.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v15
+		  0.0f,  0.5f, -0.125f,   0.0f,  0.0f, -1.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v16
+	    -0.25f,  0.0f, -0.125f,   0.0f,  0.0f, -1.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v17
 
 
   /* TRIFORCE SIDES: ... LEFT ... BOTTOM ... RIGHT ...  */
 
     /* BOTTOM LEFT TRIANGLE */
 		// LEFT SIDE
-		 -0.5f, -0.5f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v18
-		 -0.5f, -0.5f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v19
-	    -0.25f,  0.0f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v20
+		 -0.5f, -0.5f, -0.125f,  -1.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v18
+		 -0.5f, -0.5f,    0.0f,  -1.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v19
+	    -0.25f,  0.0f, -0.125f,  -1.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v20
 
-		 -0.5f, -0.5f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v21
-		-0.25f,  0.0f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v22
-	    -0.25f,  0.0f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v23
+		 -0.5f, -0.5f,    0.0f,  -1.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v21
+		-0.25f,  0.0f,    0.0f,  -1.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v22
+	    -0.25f,  0.0f, -0.125f,  -1.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v23
 
 		// BOTTOM SIDE
-		 -0.5f, -0.5f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v24
-		 -0.5f, -0.5f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v25
-	      0.0f, -0.5f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v26
+		 -0.5f, -0.5f, -0.125f,   0.0f, -1.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v24
+		 -0.5f, -0.5f,    0.0f,   0.0f, -1.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v25
+	      0.0f, -0.5f, -0.125f,   0.0f, -1.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v26
 
-		 -0.5f, -0.5f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v27
-		  0.0f, -0.5f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v28
-	      0.0f, -0.5f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v29
+		 -0.5f, -0.5f,    0.0f,   0.0f, -1.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v27
+		  0.0f, -0.5f,    0.0f,   0.0f, -1.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v28
+	      0.0f, -0.5f, -0.125f,   0.0f, -1.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v29
 
 		// RIGHT SIDE
-		  0.0f, -0.5f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v30
-		  0.0f, -0.5f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v31
-	    -0.25f,  0.0f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v32
+		  0.0f, -0.5f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v30
+		  0.0f, -0.5f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v31
+	    -0.25f,  0.0f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v32
 
-		  0.0f, -0.5f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v33
-	    -0.25f,  0.0f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v34
-	    -0.25f,  0.0f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v35
+		  0.0f, -0.5f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v33
+	    -0.25f,  0.0f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v34
+	    -0.25f,  0.0f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v35
 
     /* BOTTOM RIGHT TRIANGLE */
 		// LEFT SIDE
-		  0.0f, -0.5f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v36
-		  0.0f, -0.5f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v37
-	     0.25f,  0.0f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v38
+		  0.0f, -0.5f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v36
+		  0.0f, -0.5f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v37
+	     0.25f,  0.0f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v38
 
-		  0.0f, -0.5f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v39
-		 0.25f,  0.0f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v40
-	     0.25f,  0.0f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v41
+		  0.0f, -0.5f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v39
+		 0.25f,  0.0f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v40
+	     0.25f,  0.0f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v41
 
 		// BOTTOM SIDE
-		  0.0f, -0.5f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v42
-		  0.0f, -0.5f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v43
-	      0.5f, -0.5f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v44
+		  0.0f, -0.5f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v42
+		  0.0f, -0.5f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v43
+	      0.5f, -0.5f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v44
 
-		  0.0f, -0.5f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v45
-		  0.5f, -0.5f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v46
-	      0.5f, -0.5f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v47
+		  0.0f, -0.5f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v45
+		  0.5f, -0.5f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v46
+	      0.5f, -0.5f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v47
 
 		// RIGHT SIDE
-		  0.5f, -0.5f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v48
-		  0.5f, -0.5f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v49
-	     0.25f,  0.0f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v50
+		  0.5f, -0.5f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v48
+		  0.5f, -0.5f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v49
+	     0.25f,  0.0f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v50
 
-		  0.5f, -0.5f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v51
-		 0.25f,  0.0f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v52
-	     0.25f,  0.0f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v53
+		  0.5f, -0.5f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v51
+		 0.25f,  0.0f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v52
+	     0.25f,  0.0f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v53
 
     /* TOP TRIANGLE */
 		// LEFT SIDE
-		-0.25f,  0.0f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v54
-		-0.25f,  0.0f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v55
-	      0.0f,  0.5f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v56
+		-0.25f,  0.0f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v54
+		-0.25f,  0.0f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v55
+	      0.0f,  0.5f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v56
 
-		-0.25f,  0.0f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v57
-		  0.0f,  0.5f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v58
-	      0.0f,  0.5f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v59
+		-0.25f,  0.0f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v57
+		  0.0f,  0.5f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v58
+	      0.0f,  0.5f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v59
 
 		// BOTTOM SIDE
-		-0.25f,  0.0f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v60
-		-0.25f,  0.0f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v61
-	     0.25f,  0.0f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v62
+		-0.25f,  0.0f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v60
+		-0.25f,  0.0f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v61
+	     0.25f,  0.0f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v62
 
-		-0.25f,  0.0f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v63
-		 0.25f,  0.0f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v64
-	     0.25f,  0.0f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v65
+		-0.25f,  0.0f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v63
+		 0.25f,  0.0f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v64
+	     0.25f,  0.0f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v65
 
 		// RIGHT SIDE
-		 0.25f,  0.0f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v66
-		 0.25f,  0.0f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v67
-	      0.0f,  0.5f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v68
+		 0.25f,  0.0f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v66
+		 0.25f,  0.0f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v67
+	      0.0f,  0.5f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v68
 
-		 0.25f,  0.0f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v69
-		  0.0f,  0.5f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v70
-		  0.0f,  0.5f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f   // v71
+		 0.25f,  0.0f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v69
+		  0.0f,  0.5f, -0.125f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v70
+		  0.0f,  0.5f,    0.0f,   0.0f,  0.0f,  0.0f,    0.0f, 0.0f    //1.0f, 0.73f, 0.0f   // v71
 
 	};
 
@@ -646,20 +616,20 @@ void UCreateBuffers()
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); //Copy vertices to VBO
 
     // Set attribute pointer 0 to hold position data
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (GLvoid*)0);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)0);
     glEnableVertexAttribArray(0); //Enables vertex attribute
 
     // Set attribute pointer 1 to hold Normal data
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
     glEnableVertexAttribArray(1);
 
     // Set attribute pointer 2 to hold Texture coordinate data
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
     glEnableVertexAttribArray(2);
 
-    // Set attribute pointer 3 to hold color data
-    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (GLvoid*)(8 * sizeof(GLfloat)));
-    glEnableVertexAttribArray(3);
+  // FIXME: DELETE AFTER TROUBLESHOOTING VERTICES
+//    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (GLvoid*)(8 * sizeof(GLfloat)));
+//    glEnableVertexAttribArray(3);
 
 
     glBindVertexArray(0); // deactivate the triforce VAO

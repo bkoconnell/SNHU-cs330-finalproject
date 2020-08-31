@@ -295,7 +295,7 @@ void URenderGraphics(void){
      /* Projection Matrix Toggle */
     // toggles projection matrix between Perspective and Ortho
    	if(toggleProjection == 1){
-    	projection = glm::perspective(45.0f, (GLfloat)WindowWidth / (GLfloat)WindowHeight, 0.1f, 100.0f);
+    	projection = glm::perspective(fov, (GLfloat)WindowWidth / (GLfloat)WindowHeight, 0.1f, 100.0f);
    	}
    	else{
     	projection = glm::ortho(-5.0f, 5.0f, -5.0f, 5.0f, 0.1f, 100.0f);

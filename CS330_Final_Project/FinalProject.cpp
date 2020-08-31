@@ -665,15 +665,20 @@ void UGenerateTexture(){
     glGenTextures(1, &texture); // generate texture id
     glBindTexture(GL_TEXTURE_2D, texture); // activate (bind) the texture
 
-    int width, height; // initialize dimensions
+    // set texture filter options for currently bound texture object
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    /* JPEG image should be in project source folder */
+    // initialize image dimensions
+    int width, height;
+
+    // load JPEG image and assign to 'image' variable
     unsigned char* image = SOIL_load_image("texture_71_gold_1940pixels.jpg", &width, &height, 0, SOIL_LOAD_RGB); // Loads texture file
 
-
+    // use image to generate texture
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-    glGenerateMipmap(GL_TEXTURE_2D);
-    SOIL_free_image_data(image);
+    glGenerateMipmap(GL_TEXTURE_2D); // creates mipmaps of varying resolutions to account for further viewing distances
+    SOIL_free_image_data(image); // frees the image memory (called from SOIL2.h)
     glBindTexture(GL_TEXTURE_2D, 0); // Unbind/deactivate the texture
 }
 

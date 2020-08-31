@@ -106,15 +106,9 @@ const GLchar * triforceVertexShaderSource = GLSL(330,
         layout (location = 1) in vec3 normal; // VAP position 1 for normals (lighting)
         layout (location = 2) in vec2 textureCoordinate; // texture data from vertex attrib pointer 2
 
-      // FIXME: DELETE AFTER TROUBLESHOOTING VERTICES
-//    	layout (location = 3) in vec3 color;
-
         out vec3 FragPos; // For outgoing fragment / pixels to fragment shader
         out vec3 Normal; // For outgoing normals to fragment shader
         out vec2 mobileTextureCoordinate; // variable to transfer texture coordinate data to the fragment shader
-
-      // FIXME: DELETE AFTER TROUBLESHOOTING VERTICES
-//        out vec3 fragColor;
 
         // Uniform variables for the transform matrices
         uniform mat4 model;
@@ -126,10 +120,6 @@ const GLchar * triforceVertexShaderSource = GLSL(330,
             FragPos = vec3(model * vec4(position, 1.0f)); // Gets fragment / pixel position in world space only (exclude view and projection)
             Normal = mat3(transpose(inverse(model))) *  normal; // get normal vectors in world space only and exclude normal translation properties
             mobileTextureCoordinate = vec2(textureCoordinate.x, 1 - textureCoordinate.y); // flips the texture horizontal
-
-          // FIXME: DELETE AFTER TROUBLESHOOTING VERTICES
-//            fragColor = color;
-
         }
 );
 
@@ -141,13 +131,7 @@ const GLchar * triforceFragmentShaderSource = GLSL(330,
         in vec3 Normal; // incoming normals
         in vec2 mobileTextureCoordinate; // incoming texture coordinate
 
-      // FIXME: DELETE AFTER TROUBLESHOOTING VERTICES
-//        in vec3 fragColor;
-
         out vec4 triforceColor; // outgoing triforce color/lighting to the GPU
-
-      // FIXME: DELETE AFTER TROUBLESHOOTING VERTICES
-//        out vec4 gpuColor;
 
         // Uniform variables for light color, light position, and camera/view position
         uniform vec3 lightColor;
@@ -184,10 +168,6 @@ const GLchar * triforceFragmentShaderSource = GLSL(330,
 
             // Send lighting results to GPU
             triforceColor = vec4(phong, 1.0f);
-
-
-          // FIXME: DELETE AFTER TROUBLESHOOTING VERTICES
-//      		gpuColor = vec4(fragColor, 1.0);
         }
 );
 
@@ -479,10 +459,11 @@ void UCreateBuffers()
     // Position, Normals, & Texture coordinate data for triforce vertices
     GLfloat vertices[] = {
 
+
 		//	Vertex data           // Normals             // Texture Coordinates
 
     /* FRONT TRIFORCE */
-		// FRONT: Bottom Left triangle 	(Z positive)
+		// FRONT: Bottom Left triangle 	(Z positive)					// DELETE COLORS    // Vertex #
 		 -0.5f, -0.5f,  0.0f,     0.0f,  0.0f,  1.0f,    0.0f, 0.0f,    //1.0f, 0.0f, 0.0f, // v0
 		  0.0f, -0.5f,  0.0f,	  0.0f,  0.0f,  1.0f,    0.5f, 0.0f,    //1.0f, 0.0f, 0.0f, // v1
 		-0.25f,  0.0f,  0.0f,	  0.0f,  0.0f,  1.0f,   0.25f, 0.5f,    //1.0f, 0.0f, 0.0f, // v2
@@ -626,11 +607,6 @@ void UCreateBuffers()
     // Set attribute pointer 2 to hold Texture coordinate data
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
     glEnableVertexAttribArray(2);
-
-  // FIXME: DELETE AFTER TROUBLESHOOTING VERTICES
-//    glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, 11 * sizeof(GLfloat), (GLvoid*)(8 * sizeof(GLfloat)));
-//    glEnableVertexAttribArray(3);
-
 
     glBindVertexArray(0); // deactivate the triforce VAO
 

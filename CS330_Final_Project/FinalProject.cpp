@@ -150,15 +150,15 @@ const GLchar * triforceFragmentShaderSource = GLSL(330,
 
             // Calculate Diffuse Lighting
             vec3 norm = normalize(Normal); // Normalize vectors to 1 unit
-            vec3 lightDirection = normalize(lightPos - FragPos); // Calculate light's direction vector between light source & fragment position
-            float impact = max(dot(norm, lightDirection), 0.0); // Calculate diffuse impact (generate dot product of normal & light direction)
+            vec3 lightDir = normalize(lightPos - FragPos); // Calculate light's direction vector between light source & fragment position
+            float impact = max(dot(norm, lightDir), 0.0); // Calculate diffuse impact (generate dot product of normal & light direction)
             vec3 diffuse = impact * lightColor; // Generate diffuse light color
 
             // Calculate Specular lighting
-            float specularIntensity = 0.8f; // Set specular light strength
-            float highlightSize = 128.0f; // Set specular highlight size
+            float specularIntensity = 0.5f; // Set specular light strength
+            float highlightSize = 32.0f; // Set specular highlight size
             vec3 viewDir = normalize(viewPosition - FragPos); // Calculate view direction
-            vec3 reflectDir = reflect(-lightDirection, norm); // Calculate reflection vector
+            vec3 reflectDir = reflect(-lightDir, norm); // Calculate reflection vector
             // Calculate specular component
             float specularComponent = pow(max(dot(viewDir, reflectDir), 0.0), highlightSize);
             vec3 specular = specularIntensity * specularComponent * lightColor;

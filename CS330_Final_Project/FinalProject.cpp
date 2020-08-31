@@ -106,10 +106,15 @@ const GLchar * triforceVertexShaderSource = GLSL(330,
         layout (location = 1) in vec3 normal; // VAP position 1 for normals (lighting)
         layout (location = 2) in vec2 textureCoordinate; // texture data from vertex attrib pointer 2
 
+      // FIXME: DELETE AFTER TROUBLESHOOTING VERTICES
+    	layout (location = 3) in vec3 color;
+
         out vec3 FragPos; // For outgoing fragment / pixels to fragment shader
         out vec3 Normal; // For outgoing normals to fragment shader
         out vec2 mobileTextureCoordinate; // variable to transfer texture coordinate data to the fragment shader
 
+      // FIXME: DELETE AFTER TROUBLESHOOTING VERTICES
+        out vec3 fragColor;
 
         // Uniform variables for the transform matrices
         uniform mat4 model;
@@ -121,6 +126,10 @@ const GLchar * triforceVertexShaderSource = GLSL(330,
             FragPos = vec3(model * vec4(position, 1.0f)); // Gets fragment / pixel position in world space only (exclude view and projection)
             Normal = mat3(transpose(inverse(model))) *  normal; // get normal vectors in world space only and exclude normal translation properties
             mobileTextureCoordinate = vec2(textureCoordinate.x, 1 - textureCoordinate.y); // flips the texture horizontal
+
+          // FIXME: DELETE AFTER TROUBLESHOOTING VERTICES
+            fragColor = color;
+
         }
 );
 
@@ -133,6 +142,9 @@ const GLchar * triforceFragmentShaderSource = GLSL(330,
         in vec2 mobileTextureCoordinate; // incoming texture coordinate
 
         out vec4 triforceColor; // outgoing triforce color/lighting to the GPU
+
+      // FIXME: DELETE AFTER TROUBLESHOOTING VERTICES
+        out vec4 gpuColor;
 
         // Uniform variables for light color, light position, and camera/view position
         uniform vec3 lightColor;
@@ -169,6 +181,10 @@ const GLchar * triforceFragmentShaderSource = GLSL(330,
 
             // Send lighting results to GPU
             triforceColor = vec4(phong, 1.0f);
+
+
+          // FIXME: DELETE AFTER TROUBLESHOOTING VERTICES
+      		gpuColor = vec4(mobileColor, 1.0);
         }
 );
 
@@ -264,9 +280,9 @@ void UResizeWindow(int w, int h){
 void URenderGraphics(void){
 
     glEnable(GL_DEPTH_TEST); // enable Z depth
-//	glDepthFunc(GL_LESS); // accept fragment if closer to the camera than the former one
+	glDepthFunc(GL_LESS); // accept fragment if closer to the camera than the former one
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // clears the screen
-//	glEnable(GL_CULL_FACE); // enables cull facing so only "front-facing" graphics are rendered (a.k.a. graphics within visible viewing)
+	glEnable(GL_CULL_FACE); // enables cull facing so only "front-facing" graphics are rendered (a.k.a. graphics within visible viewing)
 
 	// replaces camera forward vector with Radians normalized as a unit vector
 	CameraForwardZ = front;
@@ -507,9 +523,9 @@ void UCreateBuffers()
 		 0.25f,  0.0f,  0.0f,	  0.0f,  0.0f,  0.0f,    0.0f, 0.0f,
 
 		// FRONT: Top triangle
-		 0.25f,  0.0f,  0.0f,	  0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v6
-		  0.0f,  0.5f,  0.0f,	  0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v7
-		-0.25f,  0.0f,  0.0f,	  0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v8
+		 0.25f,  0.0f,  0.0f,	  0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v6
+		  0.0f,  0.5f,  0.0f,	  0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v7
+		-0.25f,  0.0f,  0.0f,	  0.0f,  0.0f,  0.0f,    0.0f, 0.0f,    1.0f, 0.73f, 0.0f,  // v8
 
     /* BACK TRIFORCE */
 		// BACK: Bottom Left Triangle

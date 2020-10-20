@@ -25,15 +25,15 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
+// include vertex & fragment shader source code
+#include "vertex_shader_source.h"
+#include "fragment_shader_source.h"
 
-using namespace std; // standard namespace
+// standard namespace
+using namespace std;
 
-#define WINDOW_TITLE "3D Triforce" // macro for window title
-
-// shader program macro
-#ifndef GLSL
-#define GLSL(Version, Source) "#version " #Version "\n" #Source
-#endif
+// macro for window title
+#define WINDOW_TITLE "3D Triforce"
 
 
 /* variable declarations for shader, window size initialize, buffer and array objects */
@@ -70,7 +70,7 @@ int toggleVertices = 0; // 0 = Vertices OFF (a.k.a. Fill = ON);  Vertices ON = 1
 // Triforce position and scale
 glm::vec3 triforcePosition(0.0f, 0.0f, 0.0f); // place object at center of viewpoint
 glm::vec3 triforceRotation(0.0f, 1.0f, 0.0f); // rotate the object on Y axis
-glm::vec3 triforceScale(2.0f); // increase object size by 2 units
+glm::vec3 triforceScale(1.5f); // increase object size
 
 // Triforce and Light color
 glm::vec3 objectColor(1.0f, 1.0f, 1.0f);
@@ -82,7 +82,7 @@ glm::vec3 lightScale(0.2f);
 
 // global vector declarations for camera position, rotation, movement, etc.
 float cameraRotation = glm::radians(-25.0f);
-glm::vec3 cameraPosition = glm::vec3(0.0f, 0.0f, -6.0f); // initial camera position, placed 5 units in Z
+glm::vec3 cameraPosition = glm::vec3(0.0f, 0.0f, 0.0f); // initial camera position
 glm::vec3 CameraUpY = glm::vec3(0.0f, 1.0f, 0.0f); // temporary Y unit vector
 glm::vec3 CameraForwardZ = glm::vec3(0.0f, 0.0f, -1.0f); // temporary Z unit vector
 glm::vec3 front; // temporary z unit vector for mouse
@@ -99,105 +99,6 @@ void UMouseActiveMotion(int x, int y);
 void UMouseClick(int button, int state, int x, int y);
 
 
-
-/* triforce Vertex Shader SOURCE CODE */
-const GLchar * triforceVertexShaderSource = GLSL(330,
-        layout (location = 0) in vec3 position; // Vertex data from Vertex Attrib Pointer 0
-        layout (location = 1) in vec3 normal; // VAP position 1 for normals (lighting)
-        layout (location = 2) in vec2 textureCoordinate; // texture data from vertex attrib pointer 2
-
-        out vec3 FragPos; // For outgoing fragment / pixels to fragment shader
-        out vec3 Normal; // For outgoing normals to fragment shader
-        out vec2 mobileTextureCoordinate; // variable to transfer texture coordinate data to the fragment shader
-
-        // Uniform variables for the transform matrices
-        uniform mat4 model;
-        uniform mat4 view;
-        uniform mat4 projection;
-
-        void main(){
-        	gl_Position = projection * view * model * vec4(position, 1.0f); // transforms vertices to clip coordinates
-            FragPos = vec3(model * vec4(position, 1.0f)); // Gets fragment / pixel position in world space only (exclude view and projection)
-            Normal = mat3(transpose(inverse(model))) *  normal; // get normal vectors in world space only and exclude normal translation properties
-            mobileTextureCoordinate = vec2(textureCoordinate.x, 1 - textureCoordinate.y); // flips the texture horizontal
-        }
-);
-
-
-/* triforce Fragment Shader SOURCE CODE */
-const GLchar * triforceFragmentShaderSource = GLSL(330,
-
-        in vec3 FragPos; // incoming fragment position
-        in vec3 Normal; // incoming normals
-        in vec2 mobileTextureCoordinate; // incoming texture coordinate
-
-        out vec4 triforceColor; // outgoing triforce color/lighting to the GPU
-
-        // Uniform variables for light color, light position, and camera/view position
-        uniform vec3 lightColor;
-        uniform vec3 lightPos;
-        uniform vec3 viewPosition;
-        uniform sampler2D uTexture; // for working with multiple textures
-
-        void main(){
-
-          /* Phong lighting model calculations to generate ambient, diffuse, and specular components */
-
-            // Calculate Ambient Lighting
-            float ambientStrength = 0.2f; // Set ambient lighting strength
-            vec3 ambient = ambientStrength * lightColor; // Generate ambient light color
-
-            // Calculate Diffuse Lighting
-            vec3 norm = normalize(Normal); // Normalize vectors to 1 unit
-            vec3 lightDir = normalize(lightPos - FragPos); // Calculate light's direction vector between light source & fragment position
-            float impact = max(dot(norm, lightDir), 0.0); // Calculate diffuse impact (generate dot product of normal & light direction)
-            vec3 diffuse = impact * lightColor; // Generate diffuse light color
-
-            // Calculate Specular lighting
-            float specularIntensity = 0.5f; // Set specular light strength
-            float highlightSize = 32.0f; // Set specular highlight size
-            vec3 viewDir = normalize(viewPosition - FragPos); // Calculate view direction
-            vec3 reflectDir = reflect(-lightDir, norm); // Calculate reflection vector
-            // Calculate specular component
-            float specularComponent = pow(max(dot(viewDir, reflectDir), 0.0), highlightSize);
-            vec3 specular = specularIntensity * specularComponent * lightColor;
-
-            // Calculate phong result
-            vec3 objectColor = texture(uTexture, mobileTextureCoordinate).xyz;
-            vec3 phong = (ambient + diffuse) * objectColor + specular;
-
-            // Send lighting results to GPU
-            triforceColor = vec4(phong, 1.0f);
-        }
-);
-
-
-/* lamp Vertex Shader SOURCE CODE */
-const GLchar * lampVertexShaderSource = GLSL(330,
-
-        layout (location = 0) in vec3 position; // VAP position 0 for vertex position data
-
-        // Uniform variables for the transform matrices
-        uniform mat4 model;
-        uniform mat4 view;
-        uniform mat4 projection;
-
-        void main(){
-            gl_Position = projection * view *model * vec4(position, 1.0f); // Transforms vertices into clip coordinates
-        }
-);
-
-
-/* lamp Fragment Shader SOURCE CODE */
-const GLchar * lampFragmentShaderSource = GLSL(330,
-
-        out vec4 color; // variable for outgoing lamp color to the GPU
-
-        void main(){
-        	// send lamp color to GPU
-            color = vec4(0.8f, 0.9f, 1.0f, 1.0f); // Set lamp color
-        }
-);
 
 
 
@@ -232,7 +133,7 @@ int main(int argc, char* argv[]){
 	UCreateBuffers(); // create Buffers
 	UGenerateTexture(); // generate Textures
 
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f); // set background color (black)
+	glClearColor(0.18f, 0.31f, 0.18f, 1.0f); // set background color (dark green)
 
 	glutDisplayFunc(URenderGraphics); // renders graphics on the screen
 
@@ -463,128 +364,128 @@ void UCreateBuffers()
 		//	Vertex data           // Normals             // Texture Coordinates
 
     /* FRONT TRIFORCE */
-		// FRONT: Bottom Left triangle 	(Z positive)					// DELETE COLORS    // Vertex #
-		 -0.5f, -0.5f,  0.0f,     0.0f,  0.0f,  1.0f,    0.0f, 0.0f,    //1.0f, 0.0f, 0.0f, // v0
-		  0.0f, -0.5f,  0.0f,	  0.0f,  0.0f,  1.0f,    0.5f, 0.0f,    //1.0f, 0.0f, 0.0f, // v1
-		-0.25f,  0.0f,  0.0f,	  0.0f,  0.0f,  1.0f,   0.25f, 0.5f,    //1.0f, 0.0f, 0.0f, // v2
+		// FRONT: Bottom Left triangle 	(Z positive)					Vertex #
+		 -0.5f, -0.5f,  0.0f,     0.0f,  0.0f,  1.0f,    0.0f, 0.0f,    // v0
+		  0.0f, -0.5f,  0.0f,	  0.0f,  0.0f,  1.0f,    0.5f, 0.0f,    // v1
+		-0.25f,  0.0f,  0.0f,	  0.0f,  0.0f,  1.0f,   0.25f, 0.5f,    // v2
 
 		// FRONT: Bottom Right triangle (Z positive)
-		  0.0f, -0.5f,  0.0f,	  0.0f,  0.0f,  1.0f,    0.5f, 0.0f,    //0.0f, 1.0f, 0.0f, // v3
-		  0.5f, -0.5f,  0.0f,	  0.0f,  0.0f,  1.0f,    1.0f, 0.0f,    //0.0f, 1.0f, 0.0f, // v4
-		 0.25f,  0.0f,  0.0f,	  0.0f,  0.0f,  1.0f,   0.75f, 0.5f,    //0.0f, 1.0f, 0.0f, // v5
+		  0.0f, -0.5f,  0.0f,	  0.0f,  0.0f,  1.0f,    0.5f, 0.0f,    // v3
+		  0.5f, -0.5f,  0.0f,	  0.0f,  0.0f,  1.0f,    1.0f, 0.0f,    // v4
+		 0.25f,  0.0f,  0.0f,	  0.0f,  0.0f,  1.0f,   0.75f, 0.5f,    // v5
 
 		// FRONT: Top triangle			(Z positive)
-		 0.25f,  0.0f,  0.0f,	  0.0f,  0.0f,  1.0f,   0.75f, 0.5f,    //0.0f, 0.0f, 1.0f,  // v6
-		  0.0f,  0.5f,  0.0f,	  0.0f,  0.0f,  1.0f,    0.5f, 1.0f,    //0.0f, 0.0f, 1.0f,  // v7
-		-0.25f,  0.0f,  0.0f,	  0.0f,  0.0f,  1.0f,   0.25f, 0.5f,    //0.0f, 0.0f, 1.0f,  // v8
+		 0.25f,  0.0f,  0.0f,	  0.0f,  0.0f,  1.0f,   0.75f, 0.5f,    // v6
+		  0.0f,  0.5f,  0.0f,	  0.0f,  0.0f,  1.0f,    0.5f, 1.0f,    // v7
+		-0.25f,  0.0f,  0.0f,	  0.0f,  0.0f,  1.0f,   0.25f, 0.5f,    // v8
 
     /* BACK TRIFORCE */
 		// BACK: Bottom Left Triangle	(Z negative)
-		 -0.5f, -0.5f, -0.125f,   0.0f,  0.0f, -1.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v9
-		  0.0f, -0.5f, -0.125f,   0.0f,  0.0f, -1.0f,    0.5f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v10
-	    -0.25f,  0.0f, -0.125f,   0.0f,  0.0f, -1.0f,   0.25f, 0.5f,    //1.0f, 0.73f, 0.0f,  // v11
+		 -0.5f, -0.5f, -0.125f,   0.0f,  0.0f, -1.0f,    0.0f, 0.0f,    // v9
+		  0.0f, -0.5f, -0.125f,   0.0f,  0.0f, -1.0f,    0.5f, 0.0f,    // v10
+	    -0.25f,  0.0f, -0.125f,   0.0f,  0.0f, -1.0f,   0.25f, 0.5f,    // v11
 
 		// BACK: Bottom Right Triangle	(Z negative)
-		  0.0f, -0.5f, -0.125f,   0.0f,  0.0f, -1.0f,    0.5f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v12
-		  0.5f, -0.5f, -0.125f,   0.0f,  0.0f, -1.0f,    1.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v13
-	     0.25f,  0.0f, -0.125f,   0.0f,  0.0f, -1.0f,   0.75f, 0.5f,    //1.0f, 0.73f, 0.0f,  // v14
+		  0.0f, -0.5f, -0.125f,   0.0f,  0.0f, -1.0f,    0.5f, 0.0f,    // v12
+		  0.5f, -0.5f, -0.125f,   0.0f,  0.0f, -1.0f,    1.0f, 0.0f,    // v13
+	     0.25f,  0.0f, -0.125f,   0.0f,  0.0f, -1.0f,   0.75f, 0.5f,    // v14
 
 
 		// BACK: Top Triangle			(Z negative)
-		 0.25f,  0.0f, -0.125f,   0.0f,  0.0f, -1.0f,   0.75f, 0.5f,    //1.0f, 0.73f, 0.0f,  // v15
-		  0.0f,  0.5f, -0.125f,   0.0f,  0.0f, -1.0f,    0.5f, 1.0f,    //1.0f, 0.73f, 0.0f,  // v16
-	    -0.25f,  0.0f, -0.125f,   0.0f,  0.0f, -1.0f,   0.25f, 0.5f,    //1.0f, 0.73f, 0.0f,  // v17
+		 0.25f,  0.0f, -0.125f,   0.0f,  0.0f, -1.0f,   0.75f, 0.5f,    // v15
+		  0.0f,  0.5f, -0.125f,   0.0f,  0.0f, -1.0f,    0.5f, 1.0f,    // v16
+	    -0.25f,  0.0f, -0.125f,   0.0f,  0.0f, -1.0f,   0.25f, 0.5f,    // v17
 
 
   /* TRIFORCE SIDES: ... LEFT ... BOTTOM ... RIGHT ...  */
 
     /* BOTTOM LEFT TRIANGLE */
 		// LEFT SIDE				(X positive)
-		 -0.5f, -0.5f, -0.125f,   1.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v18
-		 -0.5f, -0.5f,    0.0f,   1.0f,  0.0f,  0.0f,    1.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v19
-	    -0.25f,  0.0f, -0.125f,   1.0f,  0.0f,  0.0f,    0.0f, 0.5f,    //1.0f, 0.73f, 0.0f,  // v20
+		 -0.5f, -0.5f, -0.125f,   1.0f,  0.0f,  0.0f,    0.0f, 0.0f,    // v18
+		 -0.5f, -0.5f,    0.0f,   1.0f,  0.0f,  0.0f,    1.0f, 0.0f,    // v19
+	    -0.25f,  0.0f, -0.125f,   1.0f,  0.0f,  0.0f,    0.0f, 0.5f,    // v20
 
-		 -0.5f, -0.5f,    0.0f,   1.0f,  0.0f,  0.0f,    1.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v21
-		-0.25f,  0.0f,    0.0f,   1.0f,  0.0f,  0.0f,    1.0f, 0.5f,    //1.0f, 0.73f, 0.0f,  // v22
-	    -0.25f,  0.0f, -0.125f,   1.0f,  0.0f,  0.0f,    0.0f, 0.5f,    //1.0f, 0.73f, 0.0f,  // v23
+		 -0.5f, -0.5f,    0.0f,   1.0f,  0.0f,  0.0f,    1.0f, 0.0f,    // v21
+		-0.25f,  0.0f,    0.0f,   1.0f,  0.0f,  0.0f,    1.0f, 0.5f,    // v22
+	    -0.25f,  0.0f, -0.125f,   1.0f,  0.0f,  0.0f,    0.0f, 0.5f,    // v23
 
 		// BOTTOM SIDE				(Y negative)
-		 -0.5f, -0.5f, -0.125f,   0.0f, -1.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v24
-		 -0.5f, -0.5f,    0.0f,   0.0f, -1.0f,  0.0f,    1.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v25
-	      0.0f, -0.5f, -0.125f,   0.0f, -1.0f,  0.0f,    0.0f, 0.5f,    //1.0f, 0.73f, 0.0f,  // v26
+		 -0.5f, -0.5f, -0.125f,   0.0f, -1.0f,  0.0f,    0.0f, 0.0f,    // v24
+		 -0.5f, -0.5f,    0.0f,   0.0f, -1.0f,  0.0f,    1.0f, 0.0f,    // v25
+	      0.0f, -0.5f, -0.125f,   0.0f, -1.0f,  0.0f,    0.0f, 0.5f,    // v26
 
-		 -0.5f, -0.5f,    0.0f,   0.0f, -1.0f,  0.0f,    1.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v27
-		  0.0f, -0.5f,    0.0f,   0.0f, -1.0f,  0.0f,    1.0f, 0.5f,    //1.0f, 0.73f, 0.0f,  // v28
-	      0.0f, -0.5f, -0.125f,   0.0f, -1.0f,  0.0f,    0.0f, 0.5f,    //1.0f, 0.73f, 0.0f,  // v29
+		 -0.5f, -0.5f,    0.0f,   0.0f, -1.0f,  0.0f,    1.0f, 0.0f,    // v27
+		  0.0f, -0.5f,    0.0f,   0.0f, -1.0f,  0.0f,    1.0f, 0.5f,    // v28
+	      0.0f, -0.5f, -0.125f,   0.0f, -1.0f,  0.0f,    0.0f, 0.5f,    // v29
 
 		// RIGHT SIDE				(X negative)
-		  0.0f, -0.5f,    0.0f,  -1.0f,  0.0f,  0.0f,    0.0f, 1.0f,    //1.0f, 0.73f, 0.0f,  // v30
-		  0.0f, -0.5f, -0.125f,  -1.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v31
-	    -0.25f,  0.0f,    0.0f,  -1.0f,  0.0f,  0.0f,    1.0f, 0.5f,    //1.0f, 0.73f, 0.0f,  // v32
+		  0.0f, -0.5f,    0.0f,  -1.0f,  0.0f,  0.0f,    0.0f, 1.0f,    // v30
+		  0.0f, -0.5f, -0.125f,  -1.0f,  0.0f,  0.0f,    0.0f, 0.0f,    // v31
+	    -0.25f,  0.0f,    0.0f,  -1.0f,  0.0f,  0.0f,    1.0f, 0.5f,    // v32
 
-		  0.0f, -0.5f, -0.125f,  -1.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v33
-	    -0.25f,  0.0f, -0.125f,  -1.0f,  0.0f,  0.0f,    0.0f, 0.5f,    //1.0f, 0.73f, 0.0f,  // v34
-	    -0.25f,  0.0f,    0.0f,  -1.0f,  0.0f,  0.0f,    1.0f, 0.5f,    //1.0f, 0.73f, 0.0f,  // v35
+		  0.0f, -0.5f, -0.125f,  -1.0f,  0.0f,  0.0f,    0.0f, 0.0f,    // v33
+	    -0.25f,  0.0f, -0.125f,  -1.0f,  0.0f,  0.0f,    0.0f, 0.5f,    // v34
+	    -0.25f,  0.0f,    0.0f,  -1.0f,  0.0f,  0.0f,    1.0f, 0.5f,    // v35
 
     /* BOTTOM RIGHT TRIANGLE */
 		// LEFT SIDE				(X positive)
-		  0.0f, -0.5f, -0.125f,   1.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v36
-		  0.0f, -0.5f,    0.0f,   1.0f,  0.0f,  0.0f,    1.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v37
-	     0.25f,  0.0f, -0.125f,   1.0f,  0.0f,  0.0f,    0.0f, 1.0f,    //1.0f, 0.73f, 0.0f,  // v38
+		  0.0f, -0.5f, -0.125f,   1.0f,  0.0f,  0.0f,    0.0f, 0.0f,    // v36
+		  0.0f, -0.5f,    0.0f,   1.0f,  0.0f,  0.0f,    1.0f, 0.0f,    // v37
+	     0.25f,  0.0f, -0.125f,   1.0f,  0.0f,  0.0f,    0.0f, 1.0f,    // v38
 
-		  0.0f, -0.5f,    0.0f,   1.0f,  0.0f,  0.0f,    1.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v39
-		 0.25f,  0.0f,    0.0f,   1.0f,  0.0f,  0.0f,    1.0f, 1.0f,    //1.0f, 0.73f, 0.0f,  // v40
-	     0.25f,  0.0f, -0.125f,   1.0f,  0.0f,  0.0f,    0.0f, 1.0f,    //1.0f, 0.73f, 0.0f,  // v41
+		  0.0f, -0.5f,    0.0f,   1.0f,  0.0f,  0.0f,    1.0f, 0.0f,    // v39
+		 0.25f,  0.0f,    0.0f,   1.0f,  0.0f,  0.0f,    1.0f, 1.0f,    // v40
+	     0.25f,  0.0f, -0.125f,   1.0f,  0.0f,  0.0f,    0.0f, 1.0f,    // v41
 
 		// BOTTOM SIDE				(Y negative)
-		  0.0f, -0.5f, -0.125f,   0.0f, -1.0f,  0.0f,    0.0f, 0.5f,    //1.0f, 0.73f, 0.0f,  // v42
-		  0.0f, -0.5f,    0.0f,   0.0f, -1.0f,  0.0f,    1.0f, 0.5f,    //1.0f, 0.73f, 0.0f,  // v43
-	      0.5f, -0.5f, -0.125f,   0.0f, -1.0f,  0.0f,    0.0f, 1.0f,    //1.0f, 0.73f, 0.0f,  // v44
+		  0.0f, -0.5f, -0.125f,   0.0f, -1.0f,  0.0f,    0.0f, 0.5f,    // v42
+		  0.0f, -0.5f,    0.0f,   0.0f, -1.0f,  0.0f,    1.0f, 0.5f,    // v43
+	      0.5f, -0.5f, -0.125f,   0.0f, -1.0f,  0.0f,    0.0f, 1.0f,    // v44
 
-		  0.0f, -0.5f,    0.0f,   0.0f, -1.0f,  0.0f,    1.0f, 0.5f,    //1.0f, 0.73f, 0.0f,  // v45
-		  0.5f, -0.5f,    0.0f,   0.0f, -1.0f,  0.0f,    1.0f, 1.0f,    //1.0f, 0.73f, 0.0f,  // v46
-	      0.5f, -0.5f, -0.125f,   0.0f, -1.0f,  0.0f,    0.0f, 1.0f,    //1.0f, 0.73f, 0.0f,  // v47
+		  0.0f, -0.5f,    0.0f,   0.0f, -1.0f,  0.0f,    1.0f, 0.5f,    // v45
+		  0.5f, -0.5f,    0.0f,   0.0f, -1.0f,  0.0f,    1.0f, 1.0f,    // v46
+	      0.5f, -0.5f, -0.125f,   0.0f, -1.0f,  0.0f,    0.0f, 1.0f,    // v47
 
 		// RIGHT SIDE				(X negative)
-		  0.5f, -0.5f,    0.0f,  -1.0f,  0.0f,  0.0f,    1.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v48
-		  0.5f, -0.5f, -0.125f,  -1.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v49
-	     0.25f,  0.0f,    0.0f,  -1.0f,  0.0f,  0.0f,    1.0f, 0.5f,    //1.0f, 0.73f, 0.0f,  // v50
+		  0.5f, -0.5f,    0.0f,  -1.0f,  0.0f,  0.0f,    1.0f, 0.0f,    // v48
+		  0.5f, -0.5f, -0.125f,  -1.0f,  0.0f,  0.0f,    0.0f, 0.0f,    // v49
+	     0.25f,  0.0f,    0.0f,  -1.0f,  0.0f,  0.0f,    1.0f, 0.5f,    // v50
 
-		  0.5f, -0.5f, -0.125f,  -1.0f,  0.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v51
-		 0.25f,  0.0f, -0.125f,  -1.0f,  0.0f,  0.0f,    0.0f, 0.5f,    //1.0f, 0.73f, 0.0f,  // v52
-	     0.25f,  0.0f,    0.0f,  -1.0f,  0.0f,  0.0f,    1.0f, 0.5f,    //1.0f, 0.73f, 0.0f,  // v53
+		  0.5f, -0.5f, -0.125f,  -1.0f,  0.0f,  0.0f,    0.0f, 0.0f,    // v51
+		 0.25f,  0.0f, -0.125f,  -1.0f,  0.0f,  0.0f,    0.0f, 0.5f,    // v52
+	     0.25f,  0.0f,    0.0f,  -1.0f,  0.0f,  0.0f,    1.0f, 0.5f,    // v53
 
     /* TOP TRIANGLE */
 		// LEFT SIDE				(X positive)
-		-0.25f,  0.0f, -0.125f,   1.0f,  0.0f,  0.0f,    0.0f, 0.5f,    //1.0f, 0.73f, 0.0f,  // v54
-		-0.25f,  0.0f,    0.0f,   1.0f,  0.0f,  0.0f,    1.0f, 0.5f,    //1.0f, 0.73f, 0.0f,  // v55
-	      0.0f,  0.5f, -0.125f,   1.0f,  0.0f,  0.0f,    0.0f, 1.0f,    //1.0f, 0.73f, 0.0f,  // v56
+		-0.25f,  0.0f, -0.125f,   1.0f,  0.0f,  0.0f,    0.0f, 0.5f,    // v54
+		-0.25f,  0.0f,    0.0f,   1.0f,  0.0f,  0.0f,    1.0f, 0.5f,    // v55
+	      0.0f,  0.5f, -0.125f,   1.0f,  0.0f,  0.0f,    0.0f, 1.0f,    // v56
 
-		-0.25f,  0.0f,    0.0f,   1.0f,  0.0f,  0.0f,   0.25f, 0.5f,    //1.0f, 0.73f, 0.0f,  // v57
-		  0.0f,  0.5f,    0.0f,   1.0f,  0.0f,  0.0f,    1.0f, 1.0f,    //1.0f, 0.73f, 0.0f,  // v58
-	      0.0f,  0.5f, -0.125f,   1.0f,  0.0f,  0.0f,    0.5f, 1.0f,    //1.0f, 0.73f, 0.0f,  // v59
+		-0.25f,  0.0f,    0.0f,   1.0f,  0.0f,  0.0f,   0.25f, 0.5f,    // v57
+		  0.0f,  0.5f,    0.0f,   1.0f,  0.0f,  0.0f,    1.0f, 1.0f,    // v58
+	      0.0f,  0.5f, -0.125f,   1.0f,  0.0f,  0.0f,    0.5f, 1.0f,    // v59
 
 		// BOTTOM SIDE				(Y negative)
-		-0.25f,  0.0f, -0.125f,   0.0f, -1.0f,  0.0f,    0.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v60
-		-0.25f,  0.0f,    0.0f,   0.0f, -1.0f,  0.0f,    1.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v61
-	     0.25f,  0.0f, -0.125f,   0.0f, -1.0f,  0.0f,   0.75f, 0.5f,    //1.0f, 0.73f, 0.0f,  // v62
+		-0.25f,  0.0f, -0.125f,   0.0f, -1.0f,  0.0f,    0.0f, 0.0f,    // v60
+		-0.25f,  0.0f,    0.0f,   0.0f, -1.0f,  0.0f,    1.0f, 0.0f,    // v61
+	     0.25f,  0.0f, -0.125f,   0.0f, -1.0f,  0.0f,   0.75f, 0.5f,    // v62
 
-		-0.25f,  0.0f,    0.0f,   0.0f, -1.0f,  0.0f,    1.0f, 0.0f,    //1.0f, 0.73f, 0.0f,  // v63
-		 0.25f,  0.0f,    0.0f,   0.0f, -1.0f,  0.0f,    1.0f, 1.0f,    //1.0f, 0.73f, 0.0f,  // v64
-	     0.25f,  0.0f, -0.125f,   0.0f, -1.0f,  0.0f,   0.75f, 0.5f,    //1.0f, 0.73f, 0.0f,  // v65
+		-0.25f,  0.0f,    0.0f,   0.0f, -1.0f,  0.0f,    1.0f, 0.0f,    // v63
+		 0.25f,  0.0f,    0.0f,   0.0f, -1.0f,  0.0f,    1.0f, 1.0f,    // v64
+	     0.25f,  0.0f, -0.125f,   0.0f, -1.0f,  0.0f,   0.75f, 0.5f,    // v65
 
 		// RIGHT SIDE				(X negative)
-		 0.25f,  0.0f,    0.0f,  -1.0f,  0.0f,  0.0f,    1.0f, 0.5f,    //1.0f, 0.73f, 0.0f,  // v66
-		 0.25f,  0.0f, -0.125f,  -1.0f,  0.0f,  0.0f,    0.0f, 0.5f,    //1.0f, 0.73f, 0.0f,  // v67
-	      0.0f,  0.5f,    0.0f,  -1.0f,  0.0f,  0.0f,    1.0f, 1.0f,    //1.0f, 0.73f, 0.0f,  // v68
+		 0.25f,  0.0f,    0.0f,  -1.0f,  0.0f,  0.0f,    1.0f, 0.5f,    // v66
+		 0.25f,  0.0f, -0.125f,  -1.0f,  0.0f,  0.0f,    0.0f, 0.5f,    // v67
+	      0.0f,  0.5f,    0.0f,  -1.0f,  0.0f,  0.0f,    1.0f, 1.0f,    // v68
 
-		 0.25f,  0.0f, -0.125f,  -1.0f,  0.0f,  0.0f,    0.0f, 0.5f,    //1.0f, 0.73f, 0.0f,  // v69
-		  0.0f,  0.5f, -0.125f,  -1.0f,  0.0f,  0.0f,    0.0f, 1.0f,    //1.0f, 0.73f, 0.0f,  // v70
-		  0.0f,  0.5f,    0.0f,  -1.0f,  0.0f,  0.0f,    1.0f, 1.0f     //1.0f, 0.73f, 0.0f   // v71
+		 0.25f,  0.0f, -0.125f,  -1.0f,  0.0f,  0.0f,    0.0f, 0.5f,    // v69
+		  0.0f,  0.5f, -0.125f,  -1.0f,  0.0f,  0.0f,    0.0f, 1.0f,    // v70
+		  0.0f,  0.5f,    0.0f,  -1.0f,  0.0f,  0.0f,    1.0f, 1.0f     // v71
 
 	};
 
-
+   // TRIFORCE VAO
     // Generate buffer ids
     glGenVertexArrays(1, &TriforceVAO);
     glGenBuffers(1, &VBO);
@@ -610,6 +511,8 @@ void UCreateBuffers()
 
     glBindVertexArray(0); // deactivate the triforce VAO
 
+
+   // LAMP VAO
     // Generate buffer ids for lamp
     glGenVertexArrays(1, &LightVAO); // Vertex Array for triforce vertex copies to serve as light source
 
@@ -865,7 +768,6 @@ void UMouseClick(int button, int state, int x, int y){
 		}
 	}
 }
-
 
 
 
